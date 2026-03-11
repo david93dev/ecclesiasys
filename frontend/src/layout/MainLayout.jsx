@@ -52,7 +52,7 @@ export function MainLayout() {
       </Sidebar>
 
       <SidebarInset>
-        <main className="w-8xl flex min-h-full flex-col items-center justify-start bg-slate-50 p-20">
+        <main className="w-full flex min-h-full flex-col items-center justify-start bg-slate-50 p-20">
           <SidebarTrigger
             className={
               "absolute top-6 left-4 transition-all duration-500 ease-out"

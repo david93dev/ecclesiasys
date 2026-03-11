@@ -3,6 +3,7 @@ import { MainLayout } from "@/layout/MainLayout";
 import { DashBoard } from "@/pages/DashBoard";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
+import { Members } from "@/pages/Members";
 
 export const AppRoutes = () => {
   return (
@@ -14,6 +15,8 @@ export const AppRoutes = () => {
 
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashBoard />} />
+
+          <Route path="/members" element={<Members />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

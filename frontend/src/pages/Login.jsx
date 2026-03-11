@@ -28,7 +28,7 @@ export const Login = () => {
         className="w-full max-w-md space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
       >
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 border-b pb-4">
+        <div className="flex items-end justify-center gap-3 border-b pb-4">
           <img src={logo} alt="logo" className="h-10 w-10" />
 
           <h1 className="text-3xl font-bold text-gray-900">
@@ -38,8 +38,8 @@ export const Login = () => {
 
         {/* Header */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-800">Login</h2>
-          <p className="text-sm text-gray-500">Acesse sua conta</p>
+          <h2 className="text-2xl font-bold text-center text-gray-800">Login</h2>
+          <p className="text-sm text-center text-gray-500">Acesse sua conta</p>
         </div>
 
         {/* Email */}

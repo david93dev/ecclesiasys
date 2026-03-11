@@ -1,4 +1,5 @@
 import { DashboardCard } from "@/components/DashboardCard";
+import { PageHeader } from "@/components/PageHeader";
 import { IoIosTrendingUp } from "react-icons/io";
 import { IoMdPeople } from "react-icons/io";
 import { IoMdCalendar } from "react-icons/io";
@@ -6,14 +7,11 @@ import { IoMdCalendar } from "react-icons/io";
 export const DashBoard = () => {
   return (
     <div className="w-full space-y-8">
-      <div className="">
-        <h2 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Visão Geral da Igreja
-        </h2>
-        <p className="">
-          Bem-vindo ao painel administrativo. Aqui está o resumo da sua
-          comunidade.
-        </p>
+      <div>
+        <PageHeader
+          title="Visão Geral da Igreja"
+          description="Bem-vindo ao painel administrativo. Aqui está o resumo da sua comunidade."
+        />
       </div>
 
       <div className="flex flex-wrap gap-6">
@@ -33,7 +31,7 @@ export const DashBoard = () => {
           trendIcon={<IoIosTrendingUp size={20} />}
         />
 
-            <DashboardCard
+        <DashboardCard
           title="Membros"
           value="42"
           description="Membros ativos"
@@ -48,8 +46,6 @@ export const DashBoard = () => {
           icon={<IoMdCalendar size={40} />}
           trendIcon={<IoIosTrendingUp size={20} />}
         />
-     
-     
       </div>
     </div>
   );
