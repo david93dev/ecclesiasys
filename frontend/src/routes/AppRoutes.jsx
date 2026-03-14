@@ -4,6 +4,8 @@ import { DashBoard } from "@/pages/DashBoard";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { Members } from "@/pages/Members";
+import { Ministries } from "@/pages/Ministries";
+import { Events } from "@/pages/Events";
 
 export const AppRoutes = () => {
   return (
@@ -17,6 +19,10 @@ export const AppRoutes = () => {
           <Route path="/dashboard" element={<DashBoard />} />
 
           <Route path="/members" element={<Members />} />
+
+          <Route path="/ministries" element={<Ministries /> } />
+
+          <Route path="/events" element={<Events /> } />
         </Route>
 
         <Route path="*" element={<NotFound />} />

@@ -38,12 +38,12 @@ export function MainLayout() {
         </SidebarContent>
 
         {/* Footer */}
-        <SidebarFooter className="border-t bg-slate-800 p-4">
+        <SidebarFooter className="border-t bg-slate-800 px-4">
           <div className="flex items-center justify-between">
             <ProfileHeader />
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center gap-1 text-sm text-white hover:text-red-500"
+              className="flex flex-col-reverse items-center justify-center gap-1 text-xs text-white hover:bg-white/30 p-1 rounded-sm"
             >
               Sair <IoMdExit size={22} />
             </button>
