@@ -55,7 +55,7 @@ export const Events = () => {
           onClick={() => setCurrentYear((prev) => prev + 1)}
           className="rounded bg-gray-100 px-3 py-1 hover:scale-110"
         >
-          <FaArrowAltCircleRight size={36}/>
+          <FaArrowAltCircleRight size={36} />
         </button>
       </div>
 
