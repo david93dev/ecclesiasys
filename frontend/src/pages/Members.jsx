@@ -79,7 +79,7 @@ export const Members = () => {
   });
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full max-w-6xl space-y-8">
       <PageHeader
         title="Gestão de Membros"
         description="Cadastre, edite e gerencie todos os membros da igreja"
