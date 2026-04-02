@@ -20,7 +20,7 @@ export function MainLayout() {
   };
   return (
     <SidebarProvider>
-      <Sidebar className={"transition-all duration-500 ease-in-out"}>
+      <Sidebar>
         <SidebarContent className="bg-linear-to-b from-slate-900 to-slate-800 shadow-sm">
           {/* Logo */}
           <div className="mx-2 flex w-[90%] items-end gap-2 border-b p-4 text-white">
@@ -55,7 +55,7 @@ export function MainLayout() {
         <main className="w-full flex min-h-full flex-col items-center justify-start bg-slate-50 p-20">
           <SidebarTrigger
             className={
-              "absolute top-6 left-4 transition-all duration-500 ease-out"
+              "absolute top-6 left-4"
             }
           />
           <Outlet />

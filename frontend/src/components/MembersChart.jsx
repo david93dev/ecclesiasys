@@ -33,7 +33,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export const MembersChart = () => {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-md h-[320px] border border-gray-100">
+    <div className="bg-white rounded-2xl p-6 shadow-md h-80 border border-gray-100">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">

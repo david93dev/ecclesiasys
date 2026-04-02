@@ -4,7 +4,8 @@ import { EventCard } from "@/components/EventCard";
 import { EventModal } from "@/components/modals/EventModal";
 import { EventsCalendar } from "@/components/EventsCalendar";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
-import { FaArrowAltCircleRight } from "react-icons/fa";
+
+import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 
 export const Events = () => {
   const [events, setEvents] = useState([]);
@@ -40,25 +41,6 @@ export const Events = () => {
         onClick={() => setOpenModal(true)}
       />
 
-      {/* PAGINAÇÃO POR ANO */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setCurrentYear((prev) => prev - 1)}
-          className="rounded bg-gray-100 px-3 py-1 hover:scale-110"
-        >
-          <FaArrowAltCircleLeft size={36}/>
-        </button>
-
-        <h2 className="text-lg font-semibold">{currentYear}</h2>
-
-        <button
-          onClick={() => setCurrentYear((prev) => prev + 1)}
-          className="rounded bg-gray-100 px-3 py-1 hover:scale-110"
-        >
-          <FaArrowAltCircleRight size={36} />
-        </button>
-      </div>
-
       {/* EVENTOS DO MÊS */}
       <div>
         <h2 className="text-xl font-semibold capitalize">
@@ -80,6 +62,25 @@ export const Events = () => {
           ))}
         </div>
       )}
+
+      {/* PAGINAÇÃO POR ANO */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setCurrentYear((prev) => prev - 1)}
+          className="rounded-full border border-gray-300 bg-gray-200/50 p-1 shadow-lg hover:scale-110"
+        >
+          <MdKeyboardArrowLeft size={36} />
+        </button>
+
+        <h2 className="text-lg font-semibold">{currentYear}</h2>
+
+        <button
+          onClick={() => setCurrentYear((prev) => prev + 1)}
+          className="rounded-full border border-gray-300 bg-gray-200/50 p-1 shadow-lg hover:scale-110"
+        >
+          <MdKeyboardArrowRight size={36} />
+        </button>
+      </div>
 
       {/* CALENDÁRIO */}
       <EventsCalendar events={eventsByYear} year={currentYear} />
