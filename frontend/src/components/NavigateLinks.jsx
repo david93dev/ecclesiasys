@@ -2,6 +2,8 @@ import { NavLink } from "react-router-dom";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { IoMdPeople } from "react-icons/io";
 import { MdOutlineWorkOutline, MdEventNote } from "react-icons/md";
+import { GiReceiveMoney } from "react-icons/gi";
+import { IoSettingsSharp } from "react-icons/io5";
 
 export const NavigateLinks = () => {
   const baseClass =
@@ -51,6 +53,26 @@ export const NavigateLinks = () => {
       >
         <MdEventNote size={22} />
         Eventos
+      </NavLink>
+
+         <NavLink
+        to="/contributions"
+        className={({ isActive }) =>
+          `${baseClass} ${isActive ? activeClass : inactiveClass}`
+        }
+      >
+        <GiReceiveMoney size={22} />
+        Contribuições
+      </NavLink>
+
+             <NavLink
+        to="/settings"
+        className={({ isActive }) =>
+          `${baseClass} ${isActive ? activeClass : inactiveClass}`
+        }
+      >
+        <IoSettingsSharp size={22} />
+        Configurações
       </NavLink>
     </nav>
   );

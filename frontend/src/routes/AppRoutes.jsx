@@ -6,6 +6,8 @@ import { NotFound } from "@/pages/NotFound";
 import { Members } from "@/pages/Members";
 import { Ministries } from "@/pages/Ministries";
 import { Events } from "@/pages/Events";
+import { Contributions } from "@/pages/Contributions";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 export const AppRoutes = () => {
   return (
@@ -23,6 +25,10 @@ export const AppRoutes = () => {
           <Route path="/ministries" element={<Ministries /> } />
 
           <Route path="/events" element={<Events /> } />
+
+          <Route path="/contributions" element={<Contributions /> } />
+
+          <Route path="/settings" element={<SettingsPage /> } />
         </Route>
 
         <Route path="*" element={<NotFound />} />

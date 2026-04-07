@@ -80,7 +80,7 @@ export const Events = () => {
         >
           <MdKeyboardArrowRight size={36} />
         </button>
-      </div>
+      </div>  
 
       {/* CALENDÁRIO */}
       <EventsCalendar events={eventsByYear} year={currentYear} />

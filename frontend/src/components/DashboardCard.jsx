@@ -8,12 +8,12 @@ export const DashboardCard = ({
   return (
     <div className="flex w-70 items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       
-      <div className="space-y-4">
+      <div className="space-y-5">
         <p className="text-xs font-medium text-slate-500">{title}</p>
 
-        <span className="text-4xl font-bold text-slate-900">{value}</span>
+        <span className="text-3xl font-bold text-slate-900">{value}</span>
 
-        <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 text-xs pt-4 text-slate-600">
           {trendIcon}
           {description}
         </div>

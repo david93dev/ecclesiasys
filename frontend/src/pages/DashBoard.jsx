@@ -5,6 +5,8 @@ import { EventsChart } from "@/components/EventsChart";
 
 import { IoIosTrendingUp } from "react-icons/io";
 import { IoMdPeople, IoMdCalendar } from "react-icons/io";
+import { ContributionsChart } from "@/components/ContributionsChart";
+import { ContributionsPieChart } from "@/components/ContributionsPieChart";
 
 export const DashBoard = () => {
   const cards = [
@@ -36,14 +38,13 @@ export const DashBoard = () => {
 
   return (
     <div className="w-full max-w-6xl space-y-8">
-
       <PageHeader
         title="Visão Geral da Igreja"
         description="Bem-vindo ao painel administrativo. Aqui está o resumo da sua comunidade."
       />
 
       {/* CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card, index) => (
           <DashboardCard
             key={index}
@@ -54,11 +55,12 @@ export const DashBoard = () => {
       </div>
 
       {/* GRÁFICOS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <MembersChart />
         <EventsChart />
+        <ContributionsPieChart />
+        <ContributionsChart />
       </div>
-
     </div>
   );
 };

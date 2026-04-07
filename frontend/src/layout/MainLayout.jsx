@@ -7,21 +7,26 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "@/assets/img/logo.png";
 import { IoMdExit } from "react-icons/io";
 
-export function MainLayout() {
+// 🔥 Componente interno (usa o contexto do sidebar)
+function LayoutContent() {
   const navigate = useNavigate();
+  const { open } = useSidebar();
 
   const handleLogout = () => {
     navigate("/login");
   };
+
   return (
-    <SidebarProvider>
+    <>
       <Sidebar>
         <SidebarContent className="bg-linear-to-b from-slate-900 to-slate-800 shadow-sm">
+          
           {/* Logo */}
           <div className="mx-2 flex w-[90%] items-end gap-2 border-b p-4 text-white">
             <div className="w-9">
@@ -41,9 +46,10 @@ export function MainLayout() {
         <SidebarFooter className="border-t bg-slate-800 px-4">
           <div className="flex items-center justify-between">
             <ProfileHeader />
+
             <button
               onClick={handleLogout}
-              className="flex flex-col-reverse items-center justify-center gap-1 text-xs text-white hover:bg-white/30 p-1 rounded-sm"
+              className="flex flex-col-reverse items-center justify-center gap-1 rounded-sm p-1 text-xs text-white hover:bg-white/30"
             >
               Sair <IoMdExit size={22} />
             </button>
@@ -52,15 +58,27 @@ export function MainLayout() {
       </Sidebar>
 
       <SidebarInset>
-        <main className="w-full flex min-h-full flex-col items-center justify-start bg-slate-50 p-20">
+        <main className="flex min-h-full w-full flex-col items-center justify-start bg-slate-50 p-20">
+          
+          {/* 🔥 Botão que acompanha o sidebar */}
           <SidebarTrigger
-            className={
-              "absolute top-6 left-4"
-            }
+            className={`fixed top-6 z-50 rounded-md bg-white p-2 shadow-md transition-all duration-300
+              ${open ? "left-67" : "left-8"}
+            `}
           />
+
           <Outlet />
         </main>
       </SidebarInset>
+    </>
+  );
+}
+
+// 🔥 Componente principal com Provider
+export function MainLayout() {
+  return (
+    <SidebarProvider>
+      <LayoutContent />
     </SidebarProvider>
   );
 }
