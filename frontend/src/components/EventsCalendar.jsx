@@ -7,7 +7,7 @@ const months = [
   "Setembro","Outubro","Novembro","Dezembro"
 ];
 
-export const EventsCalendar = ({ events, year }) => {
+export const EventsCalendar = ({ events, year, onEdit, onDelete }) => {
   const currentMonth = new Date().getMonth();
   const [openMonth, setOpenMonth] = useState(currentMonth);
 
@@ -57,7 +57,12 @@ export const EventsCalendar = ({ events, year }) => {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {monthEvents.map((event) => (
-                      <EventCard key={event._id} event={event} />
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
                     ))}
                   </div>
                 )}

@@ -1,21 +1,100 @@
 import { PageHeader } from "@/components/PageHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EventCard } from "@/components/EventCard";
 import { EventModal } from "@/components/modals/EventModal";
 import { EventsCalendar } from "@/components/EventsCalendar";
-import { FaArrowAltCircleLeft } from "react-icons/fa";
-
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
+import { api } from "@/services/api";
+import { toast } from "sonner";
 
 export const Events = () => {
   const [events, setEvents] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-  const handleSave = (newEvent) => {
-    setEvents((prev) => [...prev, { ...newEvent, _id: Date.now() }]);
+  // 🔥 BUSCAR EVENTOS
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get("/event");
+
+      const formatted = res.data.map((e) => ({
+        id: e._id,
+        title: e.title,
+        description: e.description,
+        date: e.date,
+        responsible: e.responsible,
+        participants: e.participants || [],
+      }));
+
+      setEvents(formatted);
+    } catch {
+      toast.error("Erro ao carregar eventos");
+    }
   };
 
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // 💾 SALVAR (CREATE + UPDATE)
+  const handleSave = async (newEvent) => {
+    try {
+      const payload = {
+        title: newEvent.title,
+        description: newEvent.description,
+        date: newEvent.date,
+        responsible: newEvent.responsibleId,
+        participants: newEvent.participants || [],
+      };
+
+      if (selectedEvent) {
+        // ✏️ UPDATE
+        await api.put(`/event/${selectedEvent.id}`, payload);
+        toast.success("Evento atualizado com sucesso");
+      } else {
+        // 🆕 CREATE
+        await api.post("/event", payload);
+        toast.success("Evento criado com sucesso");
+      }
+
+      fetchEvents();
+      setOpenModal(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error(error.response?.data);
+      toast.error(error.response?.data?.message || "Erro ao salvar evento");
+    }
+  };
+
+  // ✏️ EDITAR
+  const handleEdit = (event) => {
+    setSelectedEvent(event);
+    setOpenModal(true);
+  };
+
+  // ❌ DELETAR
+  const handleDelete = (id) => {
+    toast("Deseja excluir este evento?", {
+      action: {
+        label: "Excluir",
+        onClick: async () => {
+          try {
+            await api.delete(`/event/${id}`);
+            toast.success("Evento excluído com sucesso");
+            fetchEvents();
+          } catch {
+            toast.error("Erro ao deletar evento");
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    });
+  };
+
+  // 🔍 FILTROS
   const today = new Date();
 
   const eventsByYear = events.filter((event) => {
@@ -38,7 +117,10 @@ export const Events = () => {
         title="Eventos"
         description="Gerencie os eventos da igreja"
         buttonLabel="Novo Evento"
-        onClick={() => setOpenModal(true)}
+        onClick={() => {
+          setSelectedEvent(null);
+          setOpenModal(true);
+        }}
       />
 
       {/* EVENTOS DO MÊS */}
@@ -46,28 +128,30 @@ export const Events = () => {
         <h2 className="text-xl font-semibold capitalize">
           Eventos desse mês: {monthName}
         </h2>
-        <p className="text-sm text-gray-500">
-          Eventos programados para este mês
-        </p>
       </div>
 
       {currentMonthEvents.length === 0 ? (
         <div className="py-10 text-center text-gray-400">
-          Nenhum evento cadastrado para este mês
+          Nenhum evento cadastrado
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {currentMonthEvents.map((event) => (
-            <EventCard key={event._id} event={event} />
+            <EventCard
+              key={event.id}
+              event={event}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
 
-      {/* PAGINAÇÃO POR ANO */}
+      {/* PAGINAÇÃO */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setCurrentYear((prev) => prev - 1)}
-          className="rounded-full border border-gray-300 bg-gray-200/50 p-1 shadow-lg hover:scale-110"
+          onClick={() => setCurrentYear((p) => p - 1)}
+          className="transition hover:scale-110"
         >
           <MdKeyboardArrowLeft size={36} />
         </button>
@@ -75,19 +159,29 @@ export const Events = () => {
         <h2 className="text-lg font-semibold">{currentYear}</h2>
 
         <button
-          onClick={() => setCurrentYear((prev) => prev + 1)}
-          className="rounded-full border border-gray-300 bg-gray-200/50 p-1 shadow-lg hover:scale-110"
+          onClick={() => setCurrentYear((p) => p + 1)}
+          className="transition hover:scale-110"
         >
           <MdKeyboardArrowRight size={36} />
         </button>
-      </div>  
+      </div>
 
       {/* CALENDÁRIO */}
-      <EventsCalendar events={eventsByYear} year={currentYear} />
+      <EventsCalendar
+        events={eventsByYear}
+        year={currentYear}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
+      {/* MODAL */}
       <EventModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        event={selectedEvent}
+        onClose={() => {
+          setOpenModal(false);
+          setSelectedEvent(null);
+        }}
         onSave={handleSave}
       />
     </div>
