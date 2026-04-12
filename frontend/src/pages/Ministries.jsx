@@ -1,60 +1,109 @@
 import { PageHeader } from "@/components/PageHeader";
 import { SearchFilter } from "@/components/SearchFilter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "@/components/DataTable";
-import { FiEdit, FiEye } from "react-icons/fi";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { MinistryModal } from "@/components/modals/MinistryModal";
-
-const initialData = [
-  { id: 1, name: "Pastor", leader: "João Silva", status: "ativo" },
-  { id: 2, name: "Diácono", leader: "Carlos Pereira", status: "ativo" },
-  { id: 3, name: "Louvor", leader: "Maria Souza", status: "ativo" },
-  { id: 4, name: "Técnico de Som", leader: "Lucas Santos", status: "inativo" },
-  { id: 5, name: "Recepção", leader: "Ana Lima", status: "ativo" },
-];
+import { api } from "@/services/api";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Ministries = () => {
-  const [ministries, setMinistries] = useState(initialData);
+  const [ministries, setMinistries] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchSelect, setSearchSelect] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [selectedMinistry, setSelectedMinistry] = useState(null);
 
+  // 🔥 BUSCAR DADOS DO BACK
+  const fetchMinistries = async () => {
+    try {
+      const response = await api.get("/ministry");
+
+      const formatted = response.data.map((m) => ({
+        id: m._id,
+        name: m.name,
+        description: m.description,
+        leaderId: m.leader?._id,
+        leaderName: m.leader?.name || "Sem líder",
+        status: m.status === "active" ? "ativo" : "inativo",
+      }));
+
+      setMinistries(formatted);
+    } catch (error) {
+      toast.error("Erro ao carregar ministérios", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMinistries();
+  }, []);
+
+  // 🆕 NOVO
   const handleNew = () => {
     setSelectedMinistry(null);
     setOpenModal(true);
   };
 
+  // ✏️ EDITAR
   const handleEdit = (ministry) => {
     setSelectedMinistry(ministry);
     setOpenModal(true);
   };
 
-  const handleSave = (newData) => {
-    if (selectedMinistry) {
-      // editar
-      setMinistries((prev) =>
-        prev.map((m) =>
-          m.id === selectedMinistry.id ? { ...m, ...newData } : m
-        )
-      );
-    } else {
-      // criar
-      const newMinistry = {
-        id: Date.now(),
-        ...newData,
+  // 💾 SALVAR (CREATE / UPDATE)
+  const handleSave = async (newData) => {
+    try {
+      if (!newData.leaderId) {
+        toast.error("Selecione um líder");
+        return;
+      }
+      // 🔥 Ajuste aqui
+      const payload = {
+        name: newData.name,
+        description: newData.description,
+        leader: newData.leaderId, // 👈 TEM QUE SER ID
+        // members: newData.members || [],
+        status: newData.status === "ativo" ? "active" : "inactive",
       };
-      setMinistries((prev) => [...prev, newMinistry]);
+
+      if (selectedMinistry) {
+        await api.put(`/ministry/${selectedMinistry.id}`, payload);
+        toast.success("Ministério atualizado com sucesso");
+      } else {
+        await api.post("/ministry", payload);
+        toast.success("Ministério criado com sucesso");
+      }
+
+      fetchMinistries();
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Erro real:", error.response?.data || error);
+      toast.error(error.response?.data?.message || "Erro ao salvar ministério");
     }
   };
 
+  // ❌ DELETAR (opcional)
+  const handleDelete = async (id) => {
+    if (!confirm("Deseja realmente excluir?")) return;
+
+    try {
+      await api.delete(`/ministry/${id}`);
+      toast.success("Ministério excluído com sucesso");
+      fetchMinistries();
+    } catch (error) {
+      toast.error("Erro ao deletar ministério", error);
+    }
+  };
+
+  // 📊 COLUNAS
   const columns = [
     {
       key: "name",
       label: "Ministério",
     },
     {
-      key: "leader",
+      key: "leaderName",
       label: "Responsável",
     },
     {
@@ -77,28 +126,29 @@ export const Ministries = () => {
       label: "Ações",
       render: (row) => (
         <div className="flex gap-3 text-gray-600">
-          <button className="hover:text-blue-600">
-            <FiEye size={18} />
-          </button>
-
           <button
             onClick={() => handleEdit(row)}
             className="hover:text-amber-600"
           >
             <FiEdit size={18} />
           </button>
+
+          <button
+            onClick={() => handleDelete(row.id)}
+            className="hover:text-red-600"
+          >
+            <FiTrash2 size={18} />
+          </button>
         </div>
       ),
     },
   ];
 
+  // 🔍 FILTRO
   const filtered = ministries.filter((m) => {
-    const matchName = m.name
-      .toLowerCase()
-      .includes(searchInput.toLowerCase());
+    const matchName = m.name.toLowerCase().includes(searchInput.toLowerCase());
 
-    const matchStatus =
-      searchSelect === "" || m.status === searchSelect;
+    const matchStatus = searchSelect === "" || m.status === searchSelect;
 
     return matchName && matchStatus;
   });
@@ -120,7 +170,11 @@ export const Ministries = () => {
         placeholder="Digite o nome do ministério..."
       />
 
-      <DataTable columns={columns} data={filtered} />
+      {filtered.length > 0 ? (
+        <DataTable columns={columns} data={filtered} />
+      ) : (
+        <EmptyState />
+      )}
 
       <MinistryModal
         open={openModal}

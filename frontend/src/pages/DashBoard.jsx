@@ -44,7 +44,7 @@ export const DashBoard = () => {
       />
 
       {/* CARDS */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
         {cards.map((card, index) => (
           <DashboardCard
             key={index}
