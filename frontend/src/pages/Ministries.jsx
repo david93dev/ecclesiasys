@@ -58,11 +58,11 @@ export const Ministries = () => {
         toast.error("Selecione um líder");
         return;
       }
-      // 🔥 Ajuste aqui
+      
       const payload = {
         name: newData.name,
         description: newData.description,
-        leader: newData.leaderId, // 👈 TEM QUE SER ID
+        leader: newData.leaderId,
         // members: newData.members || [],
         status: newData.status === "ativo" ? "active" : "inactive",
       };

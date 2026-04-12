@@ -2,16 +2,20 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatPhone } from "@/utils/formatPhone";
+
+const initialForm = {
+  name: "",
+  email: "",
+  phone: "",
+  birthDate: "",
+  status: "active",
+};
 
 export const MemberModal = ({ open, onClose, onSave, member }) => {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-    status: "active",
-  });
+  const [form, setForm] = useState(initialForm);
 
+  // 🔥 carregar dados para edição
   useEffect(() => {
     if (member) {
       setForm({
@@ -22,13 +26,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
         status: member.status || "active",
       });
     } else {
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        birthDate: "",
-        status: "active",
-      });
+      setForm(initialForm);
     }
   }, [member]);
 
@@ -42,13 +40,28 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const payload = {
-      ...form,
-      _id: member?._id,
-      createdAt: member?.createdAt || new Date(),
-    };
+    const cleanPhone = form.phone.replace(/\D/g, ""); // 👈 REMOVE TUDO QUE NÃO É NÚMERO
 
-    onSave(payload);
+    if (!form.name || !cleanPhone) {
+      toast.error("Nome e telefone são obrigatórios");
+      return;
+    }
+
+    if (cleanPhone.length < 8) {
+      toast.error("Telefone inválido");
+      return;
+    }
+
+    console.log("FORM:", form);
+
+    onSave({
+      name: form.name,
+      email: form.email,
+      phone: cleanPhone, // 👈 ENVIA LIMPO
+      birthDate: form.birthDate,
+      status: form.status,
+    });
+
     onClose();
   };
 
@@ -57,7 +70,6 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
@@ -74,7 +86,6 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Nome */}
           <div className="space-y-1">
             <Label>Nome</Label>
@@ -83,6 +94,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
               value={form.name}
               onChange={(e) => handleChange("name", e.target.value)}
               className="bg-slate-100 p-5"
+              required
             />
           </div>
 
@@ -104,8 +116,11 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
             <Input
               placeholder="Telefone"
               value={form.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
+              onChange={(e) =>
+                handleChange("phone", formatPhone(e.target.value))
+              }
               className="bg-slate-100 p-5"
+              required
             />
           </div>
 
@@ -114,7 +129,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
             <Label>Data de nascimento</Label>
             <Input
               type="date"
-              value={form.birthDate}
+              value={form.birthDate || ""}
               onChange={(e) => handleChange("birthDate", e.target.value)}
               className="bg-slate-100 p-5"
             />
@@ -126,7 +141,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
             <select
               value={form.status}
               onChange={(e) => handleChange("status", e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-slate-100 py-2 px-3"
+              className="w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-2"
             >
               <option value="active">Ativo</option>
               <option value="inactive">Inativo</option>
@@ -135,20 +150,14 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
 
           {/* Footer */}
           <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className='cursor-pointer'
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
 
-            <Button className="bg-slate-900 hover:bg-slate-700 cursor-pointer" type="submit">
+            <Button type="submit" className="bg-slate-900 hover:bg-slate-700">
               Salvar
             </Button>
           </div>
-
         </form>
       </div>
     </div>
