@@ -4,25 +4,34 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import logo from "@/assets/img/logo.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // // validação simples
-    // if (!email || !password) return;
+    if (!email || !password) {
+      alert("Preencha todos os campos");
+      return;
+    }
 
-    navigate("/dashboard");
+    try {
+      await login(email, password);
+
+      navigate("/dashboard");
+    } catch (error) {
+      alert("E-mail ou senha inválidos", error.message);
+    }
   };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-linear-to-tr from-slate-900 to-slate-600 p-4">
-      
       <form
         onSubmit={handleLogin}
         className="w-full max-w-md space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
@@ -38,8 +47,10 @@ export const Login = () => {
 
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-center text-gray-800">Login</h2>
-          <p className="text-sm text-center text-gray-500">Acesse sua conta</p>
+          <h2 className="text-center text-2xl font-bold text-gray-800">
+            Login
+          </h2>
+          <p className="text-center text-sm text-gray-500">Acesse sua conta</p>
         </div>
 
         {/* Email */}
@@ -73,7 +84,6 @@ export const Login = () => {
         >
           Entrar
         </Button>
-
       </form>
     </div>
   );

@@ -12,21 +12,23 @@ import {
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "@/assets/img/logo.png";
 import { IoMdExit } from "react-icons/io";
+import { useAuth } from "@/hooks/useAuth";
 
 // 🔥 Componente interno (usa o contexto do sidebar)
 function LayoutContent() {
   const navigate = useNavigate();
   const { open } = useSidebar();
+  const { logout } = useAuth(); 
 
   const handleLogout = () => {
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
     <>
       <Sidebar>
         <SidebarContent className="bg-linear-to-b from-slate-900 to-slate-800 shadow-sm">
-          
           {/* Logo */}
           <div className="mx-2 flex w-[90%] items-end gap-2 border-b p-4 text-white">
             <div className="w-9">
@@ -59,12 +61,9 @@ function LayoutContent() {
 
       <SidebarInset>
         <main className="flex min-h-full w-full flex-col items-center justify-start bg-slate-50 p-20">
-          
           {/* 🔥 Botão que acompanha o sidebar */}
           <SidebarTrigger
-            className={`fixed top-6 z-50 rounded-md bg-white p-2 shadow-md transition-all duration-300
-              ${open ? "left-67" : "left-8"}
-            `}
+            className={`fixed top-6 z-50 rounded-md bg-white p-2 shadow-md transition-all duration-300 ${open ? "left-67" : "left-8"} `}
           />
 
           <Outlet />
