@@ -6,7 +6,7 @@ export const DashboardCard = ({
   trendIcon,
 }) => {
   return (
-    <div className="flex w-70 items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       
       <div className="space-y-5">
         <p className="text-xs font-medium text-slate-500">{title}</p>
