@@ -14,9 +14,16 @@ const contributionRoutes = require("./routes/contributionRoutes")
 const eventRoutes = require("./routes/eventRoutes")
 const ecclesiasticalProfileRoutes = require("./routes/ecclesiasticalProfileRoutes")
 const authRoutes = require("./routes/authRoutes")
+const dashboardRoutes = require("./routes/dashboardRoutes")
 
 // permite que o back acesse o front - ativando o middleware do CORS
-app.use(cors())
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://ecclesiasys.vercel.app"
+  ],
+  credentials: true
+}));
 // permite que o serv receba JSON nas requisições 
 app.use(express.json())
 
@@ -26,6 +33,8 @@ app.use("/contribution", contributionRoutes)
 app.use("/event", eventRoutes)
 app.use("/profile", ecclesiasticalProfileRoutes)
 app.use("/auth", authRoutes)
+app.use("/dashboard", dashboardRoutes)
+
 
 
 app.get("/", (req, res)=> {
