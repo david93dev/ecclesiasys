@@ -6,7 +6,7 @@ exports.getDashboard = async (req, res) => {
     try {
         const startMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-     
+      
         const [
             totalMembers,
             membersActive,
@@ -33,12 +33,12 @@ exports.getDashboard = async (req, res) => {
             ])
         ]);
 
-       
+      
         const tithes = totalMonth.find(item => item._id === "tithe")?.total || 0;
         const offers = totalMonth.find(item => item._id === "offer")?.total || 0;
         const totalAmount = tithes + offers;
 
-        // 🔥 CARDS
+     
         const cards = [
             {
                 title: "Membros",
@@ -62,7 +62,7 @@ exports.getDashboard = async (req, res) => {
             }
         ];
 
-    
+       
         const now = new Date();
         const membersChartData = [];
         const eventsChartData = [];
@@ -82,7 +82,8 @@ exports.getDashboard = async (req, res) => {
             });
 
             const monthName = date.toLocaleString("pt-BR", { month: "short" });
-            const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            const formattedMonth =
+                monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
             membersChartData.push({
                 month: formattedMonth,
@@ -105,7 +106,7 @@ exports.getDashboard = async (req, res) => {
             ]
         };
 
-        
+       
         const weeklyData = [];
 
         for (let i = 3; i >= 0; i--) {
@@ -147,10 +148,14 @@ exports.getDashboard = async (req, res) => {
         res.json({
             cards,
             chart: {
+                title: "Crescimento de Membros",
+                subtitle: "Últimos 5 meses",
                 period: "last_5_months",
                 data: membersChartData
             },
             eventsChart: {
+                title: "Eventos por Mês",
+                subtitle: "Últimos 5 meses",
                 period: "last_5_months",
                 data: eventsChartData
             },
