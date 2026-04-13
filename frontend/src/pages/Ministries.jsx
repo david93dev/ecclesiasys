@@ -168,6 +168,7 @@ export const Ministries = () => {
         status={searchSelect}
         onStatusChange={setSearchSelect}
         placeholder="Digite o nome do ministério..."
+        showStatus
       />
 
       {filtered.length > 0 ? (

@@ -13,6 +13,6 @@ router.post("/", contributionController.createContribution)
 
 router.put("/:id", contributionController.updateContribution)
 
-router.delete("/", contributionController.deleteContribution)
+router.delete("/:id", contributionController.deleteContribution)
 
 module.exports = router

@@ -172,23 +172,13 @@ export const Members = () => {
         status={searchSelect}
         onStatusChange={setSearchSelect}
         placeholder="Digite o nome..."
+        showStatus
       />
 
       {filteredMembers.length ? (
         <DataTable columns={columns} data={filteredMembers} />
       ) : (
-        <EmptyState
-          title="Nenhum membro encontrado"
-          description="Cadastre um novo membro"
-          action={
-            <button
-              onClick={handleNewMember}
-              className="bg-primary rounded-lg px-4 py-2 text-white"
-            >
-              Novo Membro
-            </button>
-          }
-        />
+        <EmptyState />
       )}
 
       <MemberModal
