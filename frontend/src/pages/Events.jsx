@@ -74,26 +74,19 @@ export const Events = () => {
   };
 
   // ❌ DELETAR
-  const handleDelete = (id) => {
-    toast("Deseja excluir este evento?", {
-      action: {
-        label: "Excluir",
-        onClick: async () => {
-          try {
-            await api.delete(`/event/${id}`);
-            toast.success("Evento excluído com sucesso");
-            fetchEvents();
-          } catch {
-            toast.error("Erro ao deletar evento");
-          }
-        },
-      },
-      cancel: {
-        label: "Cancelar",
-      },
-    });
-  };
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Deseja realmente excluir este evento?");
 
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/event/${id}`);
+      toast.success("Evento excluído com sucesso");
+      fetchEvents();
+    } catch {
+      toast.error("Erro ao deletar evento");
+    }
+  };
   // 🔍 FILTROS
   const today = new Date();
 
