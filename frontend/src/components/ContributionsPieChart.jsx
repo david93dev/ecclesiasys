@@ -7,12 +7,7 @@ import {
   Legend,
 } from "recharts";
 
-const data = [
-  { name: "Dízimos", value: 2700 },
-  { name: "Doações", value: 1800 },
-];
-
-const COLORS = ["#06b6d4", "#facc15"]; // roxo e verde (pode ajustar ao seu tema)
+const COLORS = ["#06b6d4", "#facc15"];
 
 // Tooltip customizado
 const CustomTooltip = ({ active, payload }) => {
@@ -29,17 +24,21 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-export const ContributionsPieChart = () => {
+export const ContributionsPieChart = ({ data }) => {
+  if (!data?.data?.length) {
+    return <p className="text-gray-400">Sem dados financeiros</p>;
+  }
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-md h-80 border border-gray-100">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-lg">
-          Dízimos vs Doações
+          {data.title}
         </h2>
         <span className="text-sm text-gray-400">
-          Distribuição atual
+          {data.subtitle}
         </span>
       </div>
 
@@ -47,17 +46,20 @@ export const ContributionsPieChart = () => {
         <PieChart>
           
           <Pie
-            data={data}
+            data={data.data} 
             dataKey="value"
             nameKey="name"
             cx="50%"
             cy="50%"
             outerRadius={90}
-            innerRadius={50} // deixa estilo donut 🔥
+            innerRadius={50}
             paddingAngle={3}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            {data.data.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
 

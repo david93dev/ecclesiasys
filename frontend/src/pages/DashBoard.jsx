@@ -1,40 +1,53 @@
+import { useEffect, useState } from "react";
+import { api } from "@/services/api";
+
 import { DashboardCard } from "@/components/DashboardCard";
 import { PageHeader } from "@/components/PageHeader";
 import { MembersChart } from "@/components/MembersChart";
 import { EventsChart } from "@/components/EventsChart";
-
-import { IoIosTrendingUp } from "react-icons/io";
-import { IoMdPeople, IoMdCalendar } from "react-icons/io";
 import { ContributionsChart } from "@/components/ContributionsChart";
 import { ContributionsPieChart } from "@/components/ContributionsPieChart";
 
+import { IoIosTrendingUp } from "react-icons/io";
+import { IoMdPeople, IoMdCalendar } from "react-icons/io";
+import { Loading } from "@/components/Loading";
+
 export const DashBoard = () => {
-  const cards = [
-    {
-      title: "Membros",
-      value: "42",
-      description: "Membros ativos",
-      icon: <IoMdPeople size={40} />,
-    },
-    {
-      title: "Eventos",
-      value: "8",
-      description: "Eventos este mês",
-      icon: <IoMdCalendar size={40} />,
-    },
-    {
-      title: "Visitantes",
-      value: "15",
-      description: "Últimos cultos",
-      icon: <IoMdPeople size={40} />,
-    },
-    {
-      title: "Células",
-      value: "6",
-      description: "Ativas",
-      icon: <IoMdCalendar size={40} />,
-    },
-  ];
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const response = await api.get("/dashboard");
+        console.log("DADOS:", response.data); // 👈 AQUI
+        setData(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar dashboard:", error);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  // 🔥 loading simples
+  if (!data) {
+    return <Loading />;
+  }
+
+  // 🎯 Mapear ícones dinamicamente
+  const getIcon = (title) => {
+    switch (title) {
+      case "Membros":
+      case "Novos membros":
+        return <IoMdPeople size={40} />;
+      case "Eventos":
+        return <IoMdCalendar size={40} />;
+      case "Financeiro":
+        return <IoIosTrendingUp size={40} />;
+      default:
+        return <IoMdPeople size={40} />;
+    }
+  };
 
   return (
     <div className="w-full max-w-6xl space-y-8">
@@ -43,23 +56,26 @@ export const DashBoard = () => {
         description="Bem-vindo ao painel administrativo. Aqui está o resumo da sua comunidade."
       />
 
-      {/* CARDS */}
+      {/* CARDS DINÂMICOS */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
-        {cards.map((card, index) => (
+        {data.cards.map((card, index) => (
           <DashboardCard
             key={index}
-            {...card}
+            title={card?.title || 0}
+            value={card?.value || 0}
+            description={card?.description || 0}
+            icon={getIcon(card?.title || 0)}
             trendIcon={<IoIosTrendingUp size={20} />}
           />
         ))}
       </div>
 
-      {/* GRÁFICOS */}
+      {/* GRÁFICOS DINÂMICOS */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <MembersChart />
-        <EventsChart />
-        <ContributionsPieChart />
-        <ContributionsChart />
+        <MembersChart data={data.chart} />
+        <EventsChart data={data.eventsChart} />
+        <ContributionsPieChart data={data.pieChart} />
+        <ContributionsChart data={data.weeklyChart} />
       </div>
     </div>
   );

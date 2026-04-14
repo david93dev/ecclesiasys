@@ -8,13 +8,6 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const data = [
-  { week: "Sem 1", valor: 800 },
-  { week: "Sem 2", valor: 1200 },
-  { week: "Sem 3", valor: 950 },
-  { week: "Sem 4", valor: 1500 },
-];
-
 // Tooltip customizado
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -30,27 +23,29 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export const ContributionsChart = () => {
+export const ContributionsChart = ({ data }) => {
+  if (!data?.data?.length) {
+    return <p className="text-gray-400">Sem dados de contribuições</p>;
+  }
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-md h-80 border border-gray-100">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-lg">
-          Contribuições Semanais
+          {data.title}
         </h2>
         <span className="text-sm text-gray-400">
-          Últimas 4 semanas
+          {data.subtitle}
         </span>
       </div>
 
       <ResponsiveContainer width="100%" height="85%">
-        <LineChart data={data}>
+        <LineChart data={data.data}>
           
-          {/* Grid */}
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-          {/* Eixo X */}
           <XAxis
             dataKey="week"
             tick={{ fontSize: 12 }}
@@ -58,18 +53,18 @@ export const ContributionsChart = () => {
             tickLine={false}
           />
 
-          {/* Eixo Y */}
+          {/* 🔥 Y AXIS PROFISSIONAL */}
           <YAxis
+            domain={[0, (dataMax) => dataMax + 500]}
             tick={{ fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(value) => `R$ ${value}`}
+            width={60}
           />
 
-          {/* Tooltip */}
           <Tooltip content={<CustomTooltip />} />
 
-          {/* Linha */}
           <Line
             type="monotone"
             dataKey="valor"

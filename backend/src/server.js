@@ -19,6 +19,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes")
 // permite que o back acesse o front - ativando o middleware do CORS
 app.use(cors({
   origin: [
+    "http://localhost:5174",
     "http://localhost:5173",
     "https://ecclesiasys.vercel.app"
   ],

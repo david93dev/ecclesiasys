@@ -8,14 +8,6 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const data = [
-  { month: "Jan", eventos: 2 },
-  { month: "Fev", eventos: 4 },
-  { month: "Mar", eventos: 3 },
-  { month: "Abr", eventos: 5 },
-  { month: "Mai", eventos: 8 },
-];
-
 // Tooltip customizado
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -31,27 +23,29 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export const EventsChart = () => {
+export const EventsChart = ({ data }) => {
+  if (!data?.data?.length) {
+    return <p className="text-gray-400">Sem dados de eventos</p>;
+  }
+
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-md h-[320px] border border-gray-100">
+    <div className="bg-white rounded-2xl p-6 shadow-md h-80 border border-gray-100">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-lg">
-          Eventos por Mês
+          {data.title}
         </h2>
         <span className="text-sm text-gray-400">
-          Últimos 5 meses
+          {data.subtitle}
         </span>
       </div>
 
       <ResponsiveContainer width="100%" height="85%">
-        <BarChart data={data}>
+        <BarChart data={data.data}>
           
-          {/* Grid suave */}
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-          {/* Eixo X */}
           <XAxis
             dataKey="month"
             tick={{ fontSize: 12 }}
@@ -59,20 +53,21 @@ export const EventsChart = () => {
             tickLine={false}
           />
 
-          {/* Eixo Y */}
+          {/* 🔥 Y FIXO E PROFISSIONAL */}
           <YAxis
+            domain={[0, (dataMax) => dataMax + 3]} 
+            tickCount={5}
+            width={40}
             tick={{ fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
 
-          {/* Tooltip bonito */}
           <Tooltip content={<CustomTooltip />} />
 
-          {/* Barras */}
           <Bar
             dataKey="eventos"
-            radius={[8, 8, 0, 0]} // borda arredondada
+            radius={[8, 8, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>

@@ -8,13 +8,6 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const data = [
-  { month: "Jan", membros: 20 },
-  { month: "Fev", membros: 25 },
-  { month: "Mar", membros: 30 },
-  { month: "Abr", membros: 35 },
-  { month: "Mai", membros: 42 },
-];
 
 // Tooltip customizado
 const CustomTooltip = ({ active, payload, label }) => {
@@ -31,27 +24,27 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export const MembersChart = () => {
+export const MembersChart = ({ data }) => {
+  if (!data) return null;
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-md h-80 border border-gray-100">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-lg">
-          Crescimento de Membros
+          {data.title}
         </h2>
         <span className="text-sm text-gray-400">
-          Últimos 5 meses
+          {data.subtitle}
         </span>
       </div>
 
       <ResponsiveContainer width="100%" height="85%">
-        <LineChart data={data}>
+        <LineChart data={data.data}>
           
-          {/* Grid suave */}
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-          {/* Eixo X */}
           <XAxis
             dataKey="month"
             tick={{ fontSize: 12 }}
@@ -59,23 +52,21 @@ export const MembersChart = () => {
             tickLine={false}
           />
 
-          {/* Eixo Y */}
           <YAxis
+            domain={[0, (dataMax) => dataMax + 16]} 
             tick={{ fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
 
-          {/* Tooltip */}
           <Tooltip content={<CustomTooltip />} />
 
-          {/* Linha */}
           <Line
             type="monotone"
             dataKey="membros"
             strokeWidth={3}
-            dot={{ r: 4 }} // bolinhas nos pontos
-            activeDot={{ r: 6 }} // destaque ao passar o mouse
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
           />
         </LineChart>
       </ResponsiveContainer>
