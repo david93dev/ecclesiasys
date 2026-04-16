@@ -21,7 +21,7 @@ app.use(cors({
   origin: [
     "http://localhost:5174",
     "http://localhost:5173",
-    "https://ecclesiasys.vercel.app"
+    "https://ecclesiasys.vercel.app",
   ],
   credentials: true
 }));

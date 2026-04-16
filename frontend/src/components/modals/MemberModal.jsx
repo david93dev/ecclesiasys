@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatPhone } from "@/utils/formatPhone";
+import { toast } from "sonner";
 
 const initialForm = {
   name: "",
@@ -14,8 +15,8 @@ const initialForm = {
 
 export const MemberModal = ({ open, onClose, onSave, member }) => {
   const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState({});
 
-  // 🔥 carregar dados para edição
   useEffect(() => {
     if (member) {
       setForm({
@@ -28,48 +29,102 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
     } else {
       setForm(initialForm);
     }
-  }, [member]);
+
+    setErrors({});
+  }, [member, open]);
+
+  if (!open) return null;
 
   const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [field]: null,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  // ✅ TODOS obrigatórios
+  const validate = () => {
+    const newErrors = {};
+    const cleanPhone = form.phone.replace(/\D/g, "");
+
+    if (!form.name.trim()) {
+      newErrors.name = "Nome é obrigatório";
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email é obrigatório";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!cleanPhone) {
+      newErrors.phone = "Telefone é obrigatório";
+    } else if (cleanPhone.length < 10) {
+      newErrors.phone = "Telefone inválido";
+    }
+
+    if (!form.birthDate) {
+      newErrors.birthDate = "Data de nascimento é obrigatória";
+    }
+
+    if (!form.status) {
+      newErrors.status = "Status é obrigatório";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const cleanPhone = form.phone.replace(/\D/g, ""); // 👈 REMOVE TUDO QUE NÃO É NÚMERO
+    const validationErrors = validate();
 
-    if (!form.name || !cleanPhone) {
-      toast.error("Nome e telefone são obrigatórios");
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Corrija os campos obrigatórios");
       return;
     }
 
-    if (cleanPhone.length < 8) {
-      toast.error("Telefone inválido");
-      return;
+    setErrors({});
+
+    const cleanPhone = form.phone.replace(/\D/g, "");
+
+    try {
+      await onSave({
+        name: form.name,
+        email: form.email,
+        phone: cleanPhone,
+        birthDate: form.birthDate,
+        status: form.status,
+      });
+
+      toast.success("Membro salvo com sucesso!");
+      onClose();
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors);
+        toast.error("Erro de validação");
+      } else if (err.response?.data?.message) {
+        setErrors({ general: err.response.data.message });
+        toast.error(err.response.data.message);
+      } else {
+        setErrors({ general: "Erro inesperado ao salvar" });
+        toast.error("Erro inesperado");
+      }
     }
-
-    console.log("FORM:", form);
-
-    onSave({
-      name: form.name,
-      email: form.email,
-      phone: cleanPhone, // 👈 ENVIA LIMPO
-      birthDate: form.birthDate,
-      status: form.status,
-    });
-
-    onClose();
   };
-
-  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
@@ -84,8 +139,15 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
           </button>
         </div>
 
-        {/* Form */}
+        {/* ERRO GERAL */}
+        {errors.general && (
+          <div className="mb-4 rounded bg-red-100 p-2 text-red-700">
+            {errors.general}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {/* Nome */}
           <div className="space-y-1">
             <Label>Nome</Label>
@@ -94,8 +156,10 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
               value={form.name}
               onChange={(e) => handleChange("name", e.target.value)}
               className="bg-slate-100 p-5"
-              required
             />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
+            )}
           </div>
 
           {/* Email */}
@@ -103,25 +167,30 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
             <Label>Email</Label>
             <Input
               type="email"
-              placeholder="Email"
+              placeholder="Digite o email"
               value={form.email}
               onChange={(e) => handleChange("email", e.target.value)}
               className="bg-slate-100 p-5"
             />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email}</p>
+            )}
           </div>
 
           {/* Telefone */}
           <div className="space-y-1">
             <Label>Telefone</Label>
             <Input
-              placeholder="Telefone"
+              placeholder="(83) 99999-9999"
               value={form.phone}
               onChange={(e) =>
                 handleChange("phone", formatPhone(e.target.value))
               }
               className="bg-slate-100 p-5"
-              required
             />
+            {errors.phone && (
+              <p className="text-sm text-red-500">{errors.phone}</p>
+            )}
           </div>
 
           {/* Data nascimento */}
@@ -133,6 +202,11 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
               onChange={(e) => handleChange("birthDate", e.target.value)}
               className="bg-slate-100 p-5"
             />
+            {errors.birthDate && (
+              <p className="text-sm text-red-500">
+                {errors.birthDate}
+              </p>
+            )}
           </div>
 
           {/* Status */}
@@ -146,6 +220,9 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
               <option value="active">Ativo</option>
               <option value="inactive">Inativo</option>
             </select>
+            {errors.status && (
+              <p className="text-sm text-red-500">{errors.status}</p>
+            )}
           </div>
 
           {/* Footer */}
@@ -158,6 +235,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
               Salvar
             </Button>
           </div>
+
         </form>
       </div>
     </div>

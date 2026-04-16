@@ -3,6 +3,7 @@ import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const initialForm = {
   name: "",
@@ -14,8 +15,9 @@ const initialForm = {
 export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
   const [form, setForm] = useState(initialForm);
   const [members, setMembers] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  // 🔥 carregar membros (para selecionar líder)
+  // 🔥 carregar membros
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -23,12 +25,14 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
         setMembers(res.data);
       } catch (err) {
         console.error("Erro ao carregar membros", err);
+        toast.error("Erro ao carregar membros");
       }
     };
 
     fetchMembers();
   }, []);
 
+  // 🔥 carregar dados edição
   useEffect(() => {
     if (!open) return;
 
@@ -40,13 +44,10 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
         status: ministry.status || "ativo",
       });
     } else {
-      setForm({
-        name: "",
-        description: "",
-        leader: "",
-        status: "ativo",
-      });
+      setForm(initialForm);
     }
+
+    setErrors({});
   }, [ministry, open]);
 
   if (!open) return null;
@@ -56,19 +57,74 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
       ...prev,
       [field]: value,
     }));
+
+    // limpa erro ao digitar
+    setErrors((prev) => ({
+      ...prev,
+      [field]: null,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  // ✅ validação frontend
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.name.trim()) {
+      newErrors.name = "Nome é obrigatório";
+    }
+
+    if (!form.description.trim()) {
+      newErrors.description = "Descrição é obrigatória";
+    }
+
+    if (!form.leader) {
+      newErrors.leader = "Selecione um responsável";
+    }
+
+    if (!form.status) {
+      newErrors.status = "Status é obrigatório";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    onSave({
-      name: form.name,
-      description: form.description,
-      leaderId: form.leader,
-      status: form.status,
-    });
+    const validationErrors = validate();
 
-    onClose();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Corrija os campos obrigatórios");
+      return;
+    }
+
+    setErrors({});
+
+    try {
+      await onSave({
+        name: form.name,
+        description: form.description,
+        leaderId: form.leader,
+        status: form.status,
+      });
+
+      toast.success("Ministério salvo com sucesso!");
+      onClose();
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors);
+        toast.error("Erro de validação");
+      } else if (err.response?.data?.message) {
+        setErrors({ general: err.response.data.message });
+        toast.error(err.response.data.message);
+      } else {
+        setErrors({ general: "Erro inesperado ao salvar" });
+        toast.error("Erro inesperado");
+      }
+    }
   };
 
   return (
@@ -89,6 +145,13 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
           </button>
         </div>
 
+        {/* 🔥 erro geral */}
+        {errors.general && (
+          <div className="mb-4 rounded bg-red-100 p-2 text-red-700">
+            {errors.general}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -101,17 +164,25 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
               onChange={(e) => handleChange("name", e.target.value)}
               className="bg-slate-100 p-5"
             />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
+            )}
           </div>
 
           {/* Descrição */}
           <div className="space-y-1">
             <Label>Descrição</Label>
             <Input
-              placeholder="Descrição"
+              placeholder="Descrição do ministério"
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
               className="bg-slate-100 p-5"
             />
+            {errors.description && (
+              <p className="text-sm text-red-500">
+                {errors.description}
+              </p>
+            )}
           </div>
 
           {/* Responsável */}
@@ -129,6 +200,9 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
                 </option>
               ))}
             </select>
+            {errors.leader && (
+              <p className="text-sm text-red-500">{errors.leader}</p>
+            )}
           </div>
 
           {/* Status */}
@@ -142,6 +216,9 @@ export const MinistryModal = ({ open, onClose, ministry, onSave }) => {
               <option value="ativo">Ativo</option>
               <option value="inativo">Inativo</option>
             </select>
+            {errors.status && (
+              <p className="text-sm text-red-500">{errors.status}</p>
+            )}
           </div>
 
           {/* Footer */}

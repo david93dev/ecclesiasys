@@ -18,7 +18,7 @@ export const DashBoard = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const response = await api.get("/dashboard");
+        const response = await api.get("/painel-dashboard");
         console.log("DADOS:", response.data); // 👈 AQUI
         setData(response.data);
       } catch (error) {

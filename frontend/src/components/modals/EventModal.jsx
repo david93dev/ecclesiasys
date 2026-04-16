@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 export const EventModal = ({ open, onClose, onSave, event }) => {
   const [members, setMembers] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const initialForm = {
     title: "",
@@ -44,6 +45,8 @@ export const EventModal = ({ open, onClose, onSave, event }) => {
     } else {
       setForm(initialForm);
     }
+
+    setErrors({});
   }, [event, open]);
 
   if (!open) return null;
@@ -53,19 +56,69 @@ export const EventModal = ({ open, onClose, onSave, event }) => {
       ...prev,
       [field]: value,
     }));
+
+    // limpa erro ao digitar
+    setErrors((prev) => ({
+      ...prev,
+      [field]: null,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  // ✅ validação
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.title.trim()) {
+      newErrors.title = "Título é obrigatório";
+    }
+
+    if (!form.description.trim()) {
+      newErrors.description = "Descrição é obrigatória";
+    }
+
+    if (!form.date) {
+      newErrors.date = "Data é obrigatória";
+    }
+
+    if (!form.responsibleId) {
+      newErrors.responsibleId = "Selecione um responsável";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔥 VALIDAÇÃO
-    if (!form.title || !form.description || !form.date || !form.responsibleId) {
-      toast.error("Preencha todos os campos obrigatórios");
+    const validationErrors = validate();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Corrija os campos obrigatórios");
       return;
     }
 
-    onSave(form);
-    onClose();
+    setErrors({});
+
+    try {
+      await onSave(form);
+
+      toast.success("Evento salvo com sucesso!");
+      onClose();
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors);
+        toast.error("Erro de validação");
+      } else if (err.response?.data?.message) {
+        setErrors({ general: err.response.data.message });
+        toast.error(err.response.data.message);
+      } else {
+        setErrors({ general: "Erro inesperado ao salvar" });
+        toast.error("Erro inesperado");
+      }
+    }
   };
 
   return (
@@ -86,51 +139,82 @@ export const EventModal = ({ open, onClose, onSave, event }) => {
           </button>
         </div>
 
+        {/* ERRO GERAL */}
+        {errors.general && (
+          <div className="mb-3 rounded bg-red-100 p-2 text-red-700">
+            {errors.general}
+          </div>
+        )}
+
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* TÍTULO */}
-          <input
-            type="text"
-            placeholder="Título"
-            className="w-full rounded-lg border px-3 py-2"
-            value={form.title}
-            onChange={(e) => handleChange("title", e.target.value)}
-            required
-          />
+          <div>
+            <input
+              type="text"
+              placeholder="Título do evento"
+              className="w-full rounded-lg border px-3 py-2"
+              value={form.title}
+              onChange={(e) => handleChange("title", e.target.value)}
+            />
+            {errors.title && (
+              <p className="text-sm text-red-500">{errors.title}</p>
+            )}
+          </div>
 
           {/* DESCRIÇÃO */}
-          <textarea
-            placeholder="Descrição"
-            className="w-full rounded-lg border px-3 py-2"
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            required
-          />
+          <div>
+            <textarea
+              placeholder="Descreva o evento"
+              className="w-full rounded-lg border px-3 py-2"
+              value={form.description}
+              onChange={(e) =>
+                handleChange("description", e.target.value)
+              }
+            />
+            {errors.description && (
+              <p className="text-sm text-red-500">
+                {errors.description}
+              </p>
+            )}
+          </div>
 
           {/* DATA */}
-          <input
-            type="date"
-            className="w-full rounded-lg border px-3 py-2"
-            value={form.date}
-            onChange={(e) => handleChange("date", e.target.value)}
-            required
-          />
+          <div>
+            <input
+              type="date"
+              className="w-full rounded-lg border px-3 py-2"
+              value={form.date}
+              onChange={(e) => handleChange("date", e.target.value)}
+            />
+            {errors.date && (
+              <p className="text-sm text-red-500">{errors.date}</p>
+            )}
+          </div>
 
           {/* RESPONSÁVEL */}
-          <select
-            value={form.responsibleId}
-            onChange={(e) => handleChange("responsibleId", e.target.value)}
-            className="w-full rounded-lg border px-3 py-2"
-            required
-          >
-            <option value="">Selecione um responsável</option>
-            {members.map((m) => (
-              <option key={m._id} value={m._id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <select
+              value={form.responsibleId}
+              onChange={(e) =>
+                handleChange("responsibleId", e.target.value)
+              }
+              className="w-full rounded-lg border px-3 py-2"
+            >
+              <option value="">Selecione um responsável</option>
+              {members.map((m) => (
+                <option key={m._id} value={m._id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            {errors.responsibleId && (
+              <p className="text-sm text-red-500">
+                {errors.responsibleId}
+              </p>
+            )}
+          </div>
 
           {/* FOOTER */}
           <div className="flex justify-end gap-2 pt-2">
