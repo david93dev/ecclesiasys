@@ -11,6 +11,7 @@ import { ContributionsPieChart } from "@/components/ContributionsPieChart";
 import { IoIosTrendingUp } from "react-icons/io";
 import { IoMdPeople, IoMdCalendar } from "react-icons/io";
 import { Loading } from "@/components/Loading";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 export const DashBoard = () => {
   const [data, setData] = useState(null);
@@ -49,6 +50,14 @@ export const DashBoard = () => {
     }
   };
 
+  const formatValue = (card) => {
+  if (card?.title === "Financeiro") {
+    return formatCurrency(Number(card?.value || 0));
+  }
+
+  return card?.value || 0;
+};
+
   return (
     <div className="w-full max-w-6xl space-y-8">
       <PageHeader
@@ -62,7 +71,7 @@ export const DashBoard = () => {
           <DashboardCard
             key={index}
             title={card?.title || 0}
-            value={card?.value || 0}
+            value={formatValue(card)}
             description={card?.description || 0}
             icon={getIcon(card?.title || 0)}
             trendIcon={<IoIosTrendingUp size={20} />}
