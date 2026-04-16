@@ -11,7 +11,7 @@ export const DashboardCard = ({
       <div className="space-y-5">
         <p className="text-xs font-medium text-slate-500">{title}</p>
 
-        <span className="text-3xl font-bold text-slate-900">{value}</span>
+        <span className="text-lg font-bold text-slate-900">{value}</span>
 
         <div className="flex items-center gap-2 text-xs pt-4 text-slate-600">
           {trendIcon}
