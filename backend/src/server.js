@@ -34,7 +34,7 @@ app.use("/contribution", contributionRoutes)
 app.use("/event", eventRoutes)
 app.use("/profile", ecclesiasticalProfileRoutes)
 app.use("/auth", authRoutes)
-app.use("/dashboard", dashboardRoutes)
+app.use("/painel-dashboard", dashboardRoutes)
 
 
 
