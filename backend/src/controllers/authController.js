@@ -4,7 +4,7 @@ const User = require("../models/User")
 
 exports.register = async (req, res) => {
     try{
-        const { name, email, password} = req.body
+        const { name, email, password, role} = req.body
 
         const existingUser = await User.findOne({email})
 
@@ -17,7 +17,8 @@ exports.register = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            passwordHash
+            passwordHash,
+            role
         })
 
         res.status(201).json({
@@ -25,7 +26,8 @@ exports.register = async (req, res) => {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         })
     } catch(error) {
@@ -33,7 +35,7 @@ exports.register = async (req, res) => {
             const errors = Object.values(error.errors).map(err => err.message)
             return res.status(400).json({errors})
         }
-        res.status(500).json({error: "Erro interno do servidor "})
+        res.status(500).json({error: "Erro testeinterno do servidor"})
     }
 }
 
@@ -56,7 +58,8 @@ exports.login = async (req, res) => {
         const token = jwt.sign(
             {
                 id: user._id,
-                email: user.email
+                email: user.email,
+                role: user.role
             },
             process.env.JWT_SECRET,
             {expiresIn: "1d"}
@@ -68,7 +71,8 @@ exports.login = async (req, res) => {
             user:{
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         })
     } catch (error) {
