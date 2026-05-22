@@ -17,14 +17,16 @@ const authRoutes = require("./routes/authRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
 
 // permite que o back acesse o front - ativando o middleware do CORS
-app.use(cors({
-  origin: [
-    "http://localhost:5174",
-    "http://localhost:5173",
-    "https://ecclesiasys.vercel.app",
-  ],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: [
+//     "http://localhost:5174",
+//     "http://localhost:5173",
+//     "https://ecclesiasys.vercel.app",
+//     "http://192.168.0.159:3000",
+//   ],
+//   credentials: true
+// }));
+app.use(cors());
 // permite que o serv receba JSON nas requisições 
 app.use(express.json())
 
@@ -44,6 +46,10 @@ app.get("/", (req, res)=> {
 
 const PORT = process.env.PORT || 3000
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
-})
+// app.listen(PORT, () => {
+//   console.log(`Servidor rodando na porta ${PORT}`)
+// })
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
