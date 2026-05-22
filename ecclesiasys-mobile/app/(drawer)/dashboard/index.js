@@ -7,12 +7,12 @@ import {
 
 import { useEffect, useState } from "react";
 
-import { api } from "../../services/api";
 
 import {
   Ionicons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { api } from "../../../services/api";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);

@@ -23,7 +23,7 @@ export default function Layout() {
             }}
           />
             <Stack.Screen
-            name="dashboard/index"
+            name="(drawer)"
             options={{
               headerShown: false,
             }}
