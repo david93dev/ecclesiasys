@@ -22,7 +22,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   
   const [password, setPassword] = useState("");
-  console.log('email e senha', email, password)
+
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -33,7 +33,7 @@ export default function Login() {
 
     try {
       const response = await login(email, password);
-      console.log("resposta", response)
+
       return router.replace("/dashboard");
     } catch (error) {
       Alert.alert("Erro", "E-mail ou senha inválidos");
