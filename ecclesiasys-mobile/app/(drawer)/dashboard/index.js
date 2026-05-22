@@ -1,3 +1,5 @@
+// app/dashboard/index.js
+
 import {
   View,
   Text,
@@ -12,7 +14,13 @@ import {
   Ionicons,
   MaterialIcons,
 } from "@expo/vector-icons";
+
+
 import { api } from "../../../services/api";
+import { MembersChart } from "../../../components/MembersChart";
+import { EventsChart } from "../../../components/EventsChart";
+import { ContributionsPieChart } from "../../../components/ContributionsPieChart";
+import { ContributionsChart } from "../../../components/ContributionsChart";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -88,7 +96,7 @@ export default function Dashboard() {
   return (
     <ScrollView className="flex-1 bg-slate-900 p-5">
       {/* HEADER */}
-      <View className="mb-8">
+      <View className="mb-8 mt-5">
         <Text className="text-3xl font-bold text-white">
           Visão Geral da Igreja
         </Text>
@@ -124,16 +132,18 @@ export default function Dashboard() {
         ))}
       </View>
 
-      {/* EXEMPLO GRÁFICOS */}
-      <View className="mt-4 rounded-2xl bg-slate-800 p-5">
-        <Text className="text-lg font-bold text-white">
-          Gráficos
-        </Text>
+      {/* CHARTS */}
+      <MembersChart data={data.chart} />
 
-        <Text className="mt-2 text-slate-400">
-          Aqui você pode adicionar gráficos futuramente.
-        </Text>
-      </View>
+      <EventsChart data={data.eventsChart} />
+
+      <ContributionsPieChart
+        data={data.pieChart}
+      />
+
+      <ContributionsChart
+        data={data.weeklyChart}
+      />
     </ScrollView>
   );
 }
