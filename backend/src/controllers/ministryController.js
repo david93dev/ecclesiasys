@@ -39,7 +39,7 @@ exports.createMinistry = async(req,res) => {
         if( members && members.length > 0){
             const foundMembers = await Member.find({_id: {$in: members }})
 
-            if(foundMembers.lenght !== members.lenght){
+            if(foundMembers.length !== members.length){
                 return res.status(400).json({message: "Um ou mais membros informados não existe"})
             }
         }
@@ -56,7 +56,8 @@ exports.createMinistry = async(req,res) => {
             const errors = Object.values(error.errors).map(err => err.message)
             return res.status(400).json({ errors })
         }
-        res.status(500).json({error: "Erro interno do servidor"})
+        console.log(error)
+        res.status(500).json({error: error.message})
     }
 }
 
@@ -76,7 +77,7 @@ exports.updateMinistry = async (req, res) => {
          if (members !== undefined){
         const foundMembers = await Member.find({_id: {$in: members} })
 
-        if(foundMembers.length !== members.lenght){
+        if(foundMembers.length !== members.length){
             return res.status(400).json({ message: "Um ou mais membros informados não existe"})
         }
 
