@@ -6,4 +6,3 @@ Após clonar o projeto, é necessário criar um arquivo `.env` dentro da pasta `
 
 ```env
 EXPO_PUBLIC_API_URL=https://ecclesiasys-6ntp.onrender.com
-'''
