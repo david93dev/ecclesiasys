@@ -7,6 +7,7 @@ const contributionRoutes = require("./routes/contributionRoutes")
 const eventRoutes = require("./routes/eventRoutes")
 const ecclesiasticalProfileRoutes = require("./routes/ecclesiasticalProfileRoutes")
 const authRoutes = require("./routes/authRoutes")
+const userRoutes = require("./routes/userRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
 
 const app = express()
@@ -30,6 +31,7 @@ app.use("/contribution", contributionRoutes)
 app.use("/event", eventRoutes)
 app.use("/profile", ecclesiasticalProfileRoutes)
 app.use("/auth", authRoutes)
+app.use("/user", userRoutes)
 app.use("/painel-dashboard", dashboardRoutes)
 
 app.get("/", (req, res) => {
