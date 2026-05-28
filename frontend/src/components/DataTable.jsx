@@ -5,7 +5,7 @@ export const DataTable = ({ columns, data }) => {
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-175 border-collapse">
           {/* HEADER */}
-          <thead className="bg-slate-200 text-left text-xs tracking-wide text-slate-600 uppercase sm:text-sm">
+          <thead className="bg-slate-200 text-left text-xs tracking-wide text-slate-600 sm:text-sm">
             <tr>
               {columns.map((col) => (
                 <th
