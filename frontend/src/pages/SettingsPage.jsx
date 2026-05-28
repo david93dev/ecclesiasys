@@ -6,13 +6,13 @@ import { NotificacoesSettings } from "@/components/settings/NotificacoesSettings
 import { UsuariosSettings } from "@/components/settings/UsuariosSettings";
 
 export const SettingsPage = () => {
-  const [activeTab, setActiveTab] = useState("igreja");
+  const [activeTab, setActiveTab] = useState("usuarios");
 
   const tabs = [
-    { id: "igreja", label: "Informações da Igreja" },
+    // { id: "igreja", label: "Informações da Igreja" },
     { id: "usuarios", label: "Usuários do Sistema" },
-    { id: "contribuicoes", label: "Contribuições" },
-    { id: "notificacoes", label: "Notificações" },
+    // { id: "contribuicoes", label: "Contribuições" },
+    // { id: "notificacoes", label: "Notificações" },
   ];
 
   return (
@@ -45,10 +45,10 @@ export const SettingsPage = () => {
 
       {/* Conteúdo */}
       <div className="bg-white rounded-2xl p-6 shadow-md border">
-        {activeTab === "igreja" && <IgrejaSettings />}
+        {/* {activeTab === "igreja" && <IgrejaSettings />} */}
         {activeTab === "usuarios" && <UsuariosSettings />}
-        {activeTab === "contribuicoes" && <ContribuicoesSettings />}
-        {activeTab === "notificacoes" && <NotificacoesSettings />}
+         {/* {activeTab === "contribuicoes" && <ContribuicoesSettings />}
+        {activeTab === "notificacoes" && <NotificacoesSettings />} */}
       </div>
     </div>
   );

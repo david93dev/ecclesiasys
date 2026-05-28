@@ -1,22 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/services/api";
 import { toast } from "sonner";
 
-export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
+export const ContributionModal = ({
+  open,
+  onClose,
+  onSave,
+  contribution,
+}) => {
   const [members, setMembers] = useState([]);
   const [errors, setErrors] = useState({});
 
-  const initialForm = {
-    memberId: "",
-    amount: "",
-    type: "tithe",
-    date: "",
-    note: "",
-  };
+  // ✅ estado inicial derivado sem useEffect
+  const initialForm = useMemo(
+    () => ({
+      memberId: contribution?.memberId || "",
+      amount: contribution?.amount || "",
+      type: contribution?.type || "tithe",
+      date: contribution?.date
+        ? contribution.date.split("T")[0]
+        : "",
+      note: contribution?.note || "",
+    }),
+    [contribution]
+  );
 
   const [form, setForm] = useState(initialForm);
 
-  // 🔥 carregar membros + preencher edição
+  // ✅ resetar formulário quando modal abrir
+  useEffect(() => {
+    if (!open) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setForm(initialForm);
+    setErrors({});
+  }, [open, initialForm]);
+
+  // ✅ carregar membros
   useEffect(() => {
     if (!open) return;
 
@@ -30,40 +50,24 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
     };
 
     fetchMembers();
-
-    if (contribution) {
-      setForm({
-        memberId: contribution.memberId || "",
-        amount: contribution.amount || "",
-        type: contribution.type || "tithe",
-        date: contribution.date
-          ? contribution.date.split("T")[0]
-          : "",
-        note: contribution.note || "",
-      });
-    } else {
-      setForm(initialForm);
-    }
-
-    setErrors({});
-  }, [open, contribution]);
+  }, [open]);
 
   if (!open) return null;
 
+  // ✅ alterar campos
   const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
     }));
 
-    // limpa erro ao digitar
     setErrors((prev) => ({
       ...prev,
       [field]: null,
     }));
   };
 
-  // ✅ validação (todos obrigatórios)
+  // ✅ validação
   const validate = () => {
     const newErrors = {};
 
@@ -92,6 +96,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
     return newErrors;
   };
 
+  // ✅ submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,7 +132,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4">
 
         {/* HEADER */}
@@ -163,12 +168,14 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
               className="w-full border rounded-lg p-2"
             >
               <option value="">Selecione o membro</option>
+
               {members.map((m) => (
                 <option key={m._id} value={m._id}>
                   {m.name}
                 </option>
               ))}
             </select>
+
             {errors.memberId && (
               <p className="text-sm text-red-500">
                 {errors.memberId}
@@ -187,6 +194,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
               }
               className="w-full border rounded-lg p-2"
             />
+
             {errors.amount && (
               <p className="text-sm text-red-500">
                 {errors.amount}
@@ -207,6 +215,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
               <option value="offering">Oferta</option>
               <option value="missions">Missões</option>
             </select>
+
             {errors.type && (
               <p className="text-sm text-red-500">
                 {errors.type}
@@ -224,6 +233,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
               }
               className="w-full border rounded-lg p-2"
             />
+
             {errors.date && (
               <p className="text-sm text-red-500">
                 {errors.date}
@@ -241,6 +251,7 @@ export const ContributionModal = ({ open, onClose, onSave, contribution }) => {
               }
               className="w-full border rounded-lg p-2"
             />
+
             {errors.note && (
               <p className="text-sm text-red-500">
                 {errors.note}

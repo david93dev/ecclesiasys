@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/PageHeader";
 import { SearchFilter } from "@/components/SearchFilter";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { ContributionModal } from "@/components/modals/ContributionModal";
@@ -12,12 +12,11 @@ import { EmptyState } from "@/components/EmptyState";
 export const Contributions = () => {
   const [contributions, setContributions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
-  const [searchSelect, setSearchSelect] = useState("");
+
   const [openModal, setOpenModal] = useState(false);
   const [selectedContribution, setSelectedContribution] = useState(null);
 
-  // 🔥 BUSCAR DADOS
-  const fetchContributions = async () => {
+  const fetchContributions = useCallback(async () => {
     try {
       const res = await api.get("/contribution");
 
@@ -35,11 +34,12 @@ export const Contributions = () => {
     } catch {
       toast.error("Erro ao carregar contribuições");
     }
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchContributions();
-  }, []);
+  }, [fetchContributions]);
 
   // 🆕 NOVO
   const handleNew = () => {
@@ -65,7 +65,7 @@ export const Contributions = () => {
       toast.error("Erro ao excluir");
     }
   };
-  
+
   // 💾 SALVAR
   const handleSave = async (data) => {
     try {
