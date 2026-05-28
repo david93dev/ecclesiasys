@@ -4,8 +4,12 @@ import { IoMdPeople } from "react-icons/io";
 import { MdOutlineWorkOutline, MdEventNote } from "react-icons/md";
 import { GiReceiveMoney } from "react-icons/gi";
 import { IoSettingsSharp } from "react-icons/io5";
+import { useAuth } from "@/hooks/useAuth";
+import { isAdminRole } from "@/utils/roles";
 
 export const NavigateLinks = () => {
+  const { user } = useAuth();
+
   const baseClass =
     "flex items-center text-sm gap-2 rounded p-2 font-semibold transition bg-slate-700/20";
 
@@ -55,7 +59,7 @@ export const NavigateLinks = () => {
         Eventos
       </NavLink>
 
-         <NavLink
+      <NavLink
         to="/contributions"
         className={({ isActive }) =>
           `${baseClass} ${isActive ? activeClass : inactiveClass}`
@@ -65,15 +69,17 @@ export const NavigateLinks = () => {
         Contribuições
       </NavLink>
 
-             <NavLink
-        to="/settings"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <IoSettingsSharp size={22} />
-        Configurações
-      </NavLink>
+      {isAdminRole(user?.role) && (
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `${baseClass} ${isActive ? activeClass : inactiveClass}`
+          }
+        >
+          <IoSettingsSharp size={22} />
+          Configurações
+        </NavLink>
+      )}
     </nav>
   );
 };

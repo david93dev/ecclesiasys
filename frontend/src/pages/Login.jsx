@@ -26,7 +26,7 @@ export const Login = () => {
 
       navigate("/dashboard");
     } catch (error) {
-      alert("E-mail ou senha inválidos", error.message);
+      alert(error.response?.data?.message || "E-mail ou senha inválidos");
     }
   };
 

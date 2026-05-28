@@ -38,7 +38,14 @@ export const AppRoutes = () => {
           <Route path="/ministries" element={<Ministries />} />
           <Route path="/events" element={<Events />} />
           <Route path="/contributions" element={<Contributions />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <SettingsPage />
+              </PrivateRoute>
+            }
+          />
         </Route>
 
         <Route path="*" element={<NotFound />} />

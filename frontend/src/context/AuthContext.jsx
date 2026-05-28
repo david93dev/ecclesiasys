@@ -1,7 +1,33 @@
 import { createContext, useState, useEffect } from "react";
 import { api } from "../services/api";
+import { isAdminRole } from "@/utils/roles";
 
 export const AuthContext = createContext();
+
+const normalizeRole = (role) => {
+  if (isAdminRole(role)) {
+    return "admin";
+  }
+
+  return role;
+};
+
+const getUserFromStorage = (token, userStorage) => {
+  const storedUser = JSON.parse(userStorage);
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return {
+      ...storedUser,
+      role: normalizeRole(storedUser.role || payload.role)
+    };
+  } catch {
+    return {
+      ...storedUser,
+      role: normalizeRole(storedUser.role)
+    };
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -13,7 +39,9 @@ export const AuthProvider = ({ children }) => {
 
     if (token && userStorage) {
       api.defaults.headers.Authorization = `Bearer ${token}`;
-      setUser(JSON.parse(userStorage));
+      const storedUser = getUserFromStorage(token, userStorage);
+      localStorage.setItem("user", JSON.stringify(storedUser));
+      setUser(storedUser);
     }
 
     setLoading(false);
@@ -31,14 +59,16 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("user", JSON.stringify({
       name: user.name,
-      email: user.email
+      email: user.email,
+      role: normalizeRole(user.role)
     }));
 
     api.defaults.headers.Authorization = `Bearer ${token}`;
 
     setUser({
       name: user.name,
-      email: user.email
+      email: user.email,
+      role: normalizeRole(user.role)
     });
   };
 
