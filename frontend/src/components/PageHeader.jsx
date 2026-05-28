@@ -3,22 +3,27 @@ import { GoPlus } from "react-icons/go";
 
 export const PageHeader = ({ title, description, buttonLabel, onClick }) => {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* TEXTOS */}
       <div className="space-y-1">
-        <h2 className="scroll-m-20 text-4xl font-extrabold tracking-tight">
+        <h2 className="scroll-m-20 text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
           {title}
         </h2>
 
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground max-w-2xl text-sm sm:text-base">
+          {description}
+        </p>
       </div>
 
+      {/* BOTÃO */}
       {buttonLabel && (
         <Button
-          className={"bg-slate-800 p-5 hover:bg-slate-700 flex items-center"}
           onClick={onClick}
+          className="flex w-full items-center justify-center gap-2 bg-slate-800 px-4 py-5 text-sm font-medium hover:bg-slate-700 sm:w-auto sm:px-5"
         >
-          <GoPlus />
-          {buttonLabel}
+          <GoPlus size={18} />
+
+          <span className="whitespace-nowrap">{buttonLabel}</span>
         </Button>
       )}
     </div>

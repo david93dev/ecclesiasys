@@ -31,12 +31,14 @@ export const Members = () => {
       }));
 
       setMembers(formatted);
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       toast.error("Erro ao carregar membros");
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMembers();
   }, []);
 

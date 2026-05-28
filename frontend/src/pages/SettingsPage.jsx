@@ -44,7 +44,7 @@ export const SettingsPage = () => {
       </div>
 
       {/* Conteúdo */}
-      <div className="bg-white rounded-2xl p-6 shadow-md border">
+      <div >
         {/* {activeTab === "igreja" && <IgrejaSettings />} */}
         {activeTab === "usuarios" && <UsuariosSettings />}
          {/* {activeTab === "contribuicoes" && <ContribuicoesSettings />}
