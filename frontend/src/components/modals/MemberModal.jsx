@@ -19,6 +19,7 @@ export const MemberModal = ({ open, onClose, onSave, member }) => {
 
   useEffect(() => {
     if (member) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         name: member.name || "",
         email: member.email || "",

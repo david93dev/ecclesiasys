@@ -1,132 +1,232 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import { SearchFilter } from "@/components/SearchFilter";
 import { Button } from "@/components/ui/button";
 import { GoPlus } from "react-icons/go";
 import { FiEdit, FiTrash } from "react-icons/fi";
-import { MemberModal } from "../modals/MemberModal";
-
+import { api } from "@/services/api";
+import { toast } from "sonner";
+import { UserModal } from "../modals/UserModal";
 
 export const UsuariosSettings = () => {
+
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
 
   const [openModal, setOpenModal] = useState(false);
-  const [selectedMember, setSelectedMember] = useState(null);
 
-  const [data, setData] = useState([
-    {
-      _id: 1,
-      nome: "João Silva",
-      email: "joao@email.com",
-      nivel: "Admin",
-      status: "ativo",
-    },
-    {
-      _id: 2,
-      nome: "Maria Souza",
-      email: "maria@email.com",
-      nivel: "Usuário",
-      status: "ativo",
-    },
-    {
-      _id: 3,
-      nome: "Carlos Lima",
-      email: "carlos@email.com",
-      nivel: "Usuário",
-      status: "inativo",
-    },
-  ]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const [data, setData] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+
+  // ✅ buscar usuários
+  const fetchUsers = async () => {
+
+    try {
+
+      setLoading(true);
+
+      const res = await api.get("/user");
+
+      const formatted = res.data.users.map((user) => ({
+
+        _id: user._id,
+
+        nome: user.name,
+
+        email: user.email,
+
+        role: user.role,
+
+      }));
+
+      setData(formatted);
+
+    } catch (err) {
+
+      console.error(err);
+
+      toast.error("Erro ao carregar usuários");
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   // 🔍 filtro
-  const filteredData = data.filter((user) => {
-    return (
-      user.nome.toLowerCase().includes(search.toLowerCase()) &&
-      (status ? user.status === status : true)
+  const filteredData = useMemo(() => {
+
+    return data.filter((user) =>
+      user.nome
+        .toLowerCase()
+        .includes(search.toLowerCase())
     );
-  });
 
-  // ➕ novo membro
+  }, [data, search]);
+
+  // ➕ novo
   const handleAdd = () => {
-    setSelectedMember(null);
+
+    setSelectedUser(null);
+
     setOpenModal(true);
   };
 
-  // ✏️ editar membro
+  // ✏️ editar
   const handleEdit = (row) => {
-    setSelectedMember({
-      ...row,
-      name: row.nome, // compatível com modal
+
+    setSelectedUser({
+
+      _id: row._id,
+
+      name: row.nome,
+
+      email: row.email,
+
+      role: row.role,
+
     });
+
     setOpenModal(true);
   };
 
-  // 💾 salvar (criar ou editar)
-  const handleSave = (member) => {
-    if (member._id) {
-      // editar
-      setData((prev) =>
-        prev.map((item) =>
-          item._id === member._id
-            ? {
-                ...item,
-                nome: member.name,
-                email: member.email,
-                status: member.status === "active" ? "ativo" : "inativo",
-              }
-            : item
-        )
-      );
-    } else {
-      // criar
-      const newMember = {
-        _id: Date.now(),
-        nome: member.name,
-        email: member.email,
-        nivel: "Usuário",
-        status: member.status === "active" ? "ativo" : "inativo",
-      };
+  // 💾 salvar
+  const handleSave = async (userData) => {
 
-      setData((prev) => [newMember, ...prev]);
+    try {
+
+      // ✅ editar
+      if (userData._id) {
+
+        await api.put(`/user/${userData._id}`, {
+
+          name: userData.name,
+
+          email: userData.email,
+
+          password: userData.password,
+
+          role: userData.role,
+        });
+
+        toast.success("Usuário atualizado");
+
+      } else {
+
+        // ✅ criar
+        await api.post("/user", {
+
+          name: userData.name,
+
+          email: userData.email,
+
+          password: userData.password,
+
+          role: userData.role,
+        });
+
+        toast.success("Usuário criado");
+      }
+
+      await fetchUsers();
+
+      setOpenModal(false);
+
+      setSelectedUser(null);
+
+    } catch (err) {
+
+      console.error(err);
+
+      toast.error(
+        err.response?.data?.message ||
+        "Erro ao salvar usuário"
+      );
     }
   };
 
   // 🗑️ excluir
-  const handleDelete = (id) => {
-    setData((prev) => prev.filter((item) => item._id !== id));
+  const handleDelete = async (id) => {
+
+    const confirmDelete = window.confirm(
+      "Deseja excluir este usuário?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      await api.delete(`/user/${id}`);
+
+      toast.success("Usuário excluído");
+
+      setData((prev) =>
+        prev.filter((item) => item._id !== id)
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      toast.error(
+        err.response?.data?.message ||
+        "Erro ao excluir usuário"
+      );
+    }
   };
 
+  // 📊 colunas
   const columns = [
+
     {
       key: "nome",
       label: "Nome",
     },
+
     {
       key: "email",
       label: "Email",
     },
+
     {
-      key: "nivel",
-      label: "Nível de Acesso",
+      key: "role",
+      label: "Nível de acesso",
+
       render: (row) => (
+
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold
+          
             ${
-              row.nivel === "Admin"
+              row.role === "admin"
                 ? "bg-purple-100 text-purple-700"
                 : "bg-gray-100 text-gray-700"
             }
           `}
         >
-          {row.nivel}
+
+          {row.role === "admin"
+            ? "Administrador"
+            : "Usuário"}
+
         </span>
       ),
     },
+
     {
       key: "acoes",
       label: "Ações",
+
       render: (row) => (
+
         <div className="flex gap-2">
+
           <button
             onClick={() => handleEdit(row)}
             className="text-gray-600 hover:scale-110 transition"
@@ -140,16 +240,19 @@ export const UsuariosSettings = () => {
           >
             <FiTrash size={18} />
           </button>
+
         </div>
       ),
     },
   ];
 
   return (
+
     <div className="space-y-6">
-      
-      {/* Header */}
+
+      {/* HEADER */}
       <div className="flex items-center justify-between">
+
         <h2 className="text-lg font-semibold">
           Usuários do Sistema
         </h2>
@@ -158,29 +261,42 @@ export const UsuariosSettings = () => {
           onClick={handleAdd}
           className="bg-slate-800 p-5 hover:bg-slate-700 flex items-center gap-2"
         >
+
           <GoPlus />
-          Adicionar Membro
+
+          Adicionar Usuário
+
         </Button>
       </div>
 
-      {/* Filtro */}
+      {/* FILTRO */}
       <SearchFilter
         value={search}
         onChange={setSearch}
-        status={status}
-        onStatusChange={setStatus}
         placeholder="Buscar usuário..."
       />
 
-      {/* Tabela */}
-      <DataTable columns={columns} data={filteredData} />
+      {/* TABELA */}
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+      />
 
-      {/* Modal */}
-      <MemberModal
+      {/* MODAL */}
+      <UserModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+
+        onClose={() => {
+
+          setOpenModal(false);
+
+          setSelectedUser(null);
+        }}
+
         onSave={handleSave}
-        member={selectedMember}
+
+        user={selectedUser}
       />
     </div>
   );
