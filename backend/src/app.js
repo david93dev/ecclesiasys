@@ -12,16 +12,18 @@ const dashboardRoutes = require("./routes/dashboardRoutes")
 
 const app = express()
 
-app.use(cors({
-  origin: [
-    "http://localhost:5174",
-    "http://localhost:5173",
-    "https://ecclesiasys.vercel.app",
-    "http://localhost:8081",
-    "http://192.168.1.11:8081"
-  ],
-  credentials: true
-}))
+// app.use(cors({
+//   origin: [
+//     "http://localhost:5174",
+//     "http://localhost:5173",
+//     "https://ecclesiasys.vercel.app",
+//     "http://localhost:8081",
+//     "http://192.168.1.11:8081"
+//   ],
+//   credentials: true
+// }))
+
+app.use(cors())
 
 app.use(express.json())
 
