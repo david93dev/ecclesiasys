@@ -3,13 +3,15 @@ const router = express.Router()
 const eventController = require("../controllers/eventsController")
 const authMiddleware = require("../middlewares/authMiddleware")
 
-router.use(authMiddleware)
 
-
+// --- ROTAS PÚBLICAS (Sem autenticação) ---
 router.get("/", eventController.getEvents)
 
 router.get("/:id", eventController.getEventById)
 
+router.use(authMiddleware)
+
+// --- ROTAS PRIVADAS (Protegidas pelo authMiddleware) ---
 router.post("/", eventController.createEvent)
 
 router.put("/:id", eventController.updateEvent)
