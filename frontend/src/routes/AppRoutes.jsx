@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/layout/MainLayout";
 import { DashBoard } from "@/pages/DashBoard";
+import { LandingPage } from "@/pages/LandingPage";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { Members } from "@/pages/Members";
@@ -15,7 +16,7 @@ export const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
 
         <Route
           path="/login"

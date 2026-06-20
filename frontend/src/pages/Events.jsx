@@ -106,7 +106,7 @@ export const Events = () => {
   });
 
   return (
-    <div className="w-full max-w-6xl space-y-8">
+    <div className="w-full max-w-4xl space-y-8">
       <PageHeader
         title="Eventos"
         description="Gerencie os eventos da igreja"

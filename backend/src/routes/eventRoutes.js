@@ -3,6 +3,8 @@ const router = express.Router()
 const eventController = require("../controllers/eventsController")
 const authMiddleware = require("../middlewares/authMiddleware")
 
+router.get("/public", eventController.getPublicEvents)
+
 router.use(authMiddleware)
 
 

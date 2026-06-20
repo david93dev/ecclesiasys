@@ -1,6 +1,32 @@
 const Event = require("../models/Event")
 const Member = require("../models/Member")
 
+exports.getPublicEvents = async (req, res) => {
+    try {
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+
+        let events = await Event.find({
+            date: { $gte: startOfMonth, $lt: startOfNextMonth }
+        })
+        .select("title description date")
+        .sort({ date: 1 })
+        .limit(6)
+
+        if (events.length === 0) {
+            events = await Event.find({ date: { $gte: now } })
+            .select("title description date")
+            .sort({ date: 1 })
+            .limit(6)
+        }
+
+        res.status(200).json(events)
+    } catch (error) {
+        res.status(500).json({ error: "Erro interno do servidor" })
+    }
+}
+
 exports.getEvents = async (req, res) => {
     try {
         const events = await Event.find()

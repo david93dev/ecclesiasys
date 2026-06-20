@@ -114,7 +114,7 @@ export const DashBoard = () => {
 
           sm:grid-cols-2
 
-          xl:grid-cols-4
+          md:grid-cols-3
         "
       >
 
