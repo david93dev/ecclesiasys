@@ -387,7 +387,8 @@ export const LandingPage = () => {
                 </h2>
                 <p className="mt-4 leading-7 text-slate-300">
                   Confira os encontros e atividades do mês cadastrados pela igreja.
-                  Quando não houver programação no período, mostramos os próximos eventos.
+                  Quando não houver programação no período, mostramos os demais
+                  eventos cadastrados.
                 </p>
               </div>
               <span className="flex w-fit items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-slate-300">

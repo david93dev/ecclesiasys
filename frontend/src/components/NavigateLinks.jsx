@@ -1,84 +1,74 @@
 import { NavLink } from "react-router-dom";
-import { LuLayoutDashboard } from "react-icons/lu";
-import { IoMdPeople } from "react-icons/io";
-import { MdOutlineWorkOutline, MdEventNote } from "react-icons/md";
-import { GiReceiveMoney } from "react-icons/gi";
-import { IoSettingsSharp } from "react-icons/io5";
+import { createElement } from "react";
+import {
+  CalendarDays,
+  HandCoins,
+  LayoutDashboard,
+  Settings,
+  Users,
+  Workflow,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/utils/roles";
+
+const mainLinks = [
+  { to: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { to: "/members", label: "Membros", icon: Users },
+  { to: "/ministries", label: "Ministérios", icon: Workflow },
+  { to: "/events", label: "Eventos", icon: CalendarDays },
+  { to: "/contributions", label: "Contribuições", icon: HandCoins },
+];
+
+const linkClassName = ({ isActive }) =>
+  `group relative flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-amber-300/70 ${
+    isActive
+      ? "bg-white text-slate-950 shadow-sm"
+      : "text-slate-300 hover:bg-white/8 hover:text-white"
+  }`;
+
+const NavigationLink = ({ to, label, icon }) => (
+  <NavLink to={to} className={linkClassName}>
+    {({ isActive }) => (
+      <>
+        <span
+          className={`flex size-8 shrink-0 items-center justify-center rounded-md transition-colors ${
+            isActive
+              ? "bg-amber-100 text-amber-700"
+              : "bg-white/5 text-slate-400 group-hover:text-amber-300"
+          }`}
+        >
+          {createElement(icon, { className: "size-4.5" })}
+        </span>
+        <span>{label}</span>
+        {isActive && <span className="ml-auto size-1.5 rounded-full bg-amber-500" />}
+      </>
+    )}
+  </NavLink>
+);
 
 export const NavigateLinks = () => {
   const { user } = useAuth();
 
-  const baseClass =
-    "flex items-center text-sm gap-2 rounded p-2 font-semibold transition bg-slate-700/20";
-
-  const activeClass = "bg-white/20 text-white shadow";
-
-  const inactiveClass = "text-white hover:bg-zinc-200 hover:text-gray-800";
-
   return (
-    <nav className="mt-8 flex flex-col gap-2 p-2 ">
-      <NavLink
-        to="/dashboard"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <LuLayoutDashboard size={22} />
-        Dashboard
-      </NavLink>
-
-      <NavLink
-        to="/members"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <IoMdPeople size={22} />
-        Membros
-      </NavLink>
-
-      <NavLink
-        to="/ministries"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <MdOutlineWorkOutline size={22} />
-        Ministérios
-      </NavLink>
-
-      <NavLink
-        to="/events"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <MdEventNote size={22} />
-        Eventos
-      </NavLink>
-
-      <NavLink
-        to="/contributions"
-        className={({ isActive }) =>
-          `${baseClass} ${isActive ? activeClass : inactiveClass}`
-        }
-      >
-        <GiReceiveMoney size={22} />
-        Contribuições
-      </NavLink>
+    <nav className="space-y-7 px-3 py-6" aria-label="Navegação principal">
+      <div>
+        <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Gestão
+        </p>
+        <div className="space-y-1">
+          {mainLinks.map((link) => (
+            <NavigationLink key={link.to} {...link} />
+          ))}
+        </div>
+      </div>
 
       {isAdminRole(user?.role) && (
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            `${baseClass} ${isActive ? activeClass : inactiveClass}`
-          }
-        >
-          <IoSettingsSharp size={22} />
-          Configurações
-        </NavLink>
+        <div className="border-t border-white/10 pt-5">
+          <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Administração
+          </p>
+          <NavigationLink to="/settings" label="Configurações" icon={Settings} />
+        </div>
       )}
     </nav>
   );

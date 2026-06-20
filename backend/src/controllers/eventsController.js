@@ -21,6 +21,14 @@ exports.getPublicEvents = async (req, res) => {
             .limit(6)
         }
 
+        if (events.length === 0) {
+            events = await Event.find()
+            .select("title description date")
+            .sort({ date: -1 })
+            .limit(6)
+        }
+
+        res.set("Cache-Control", "no-store")
         res.status(200).json(events)
     } catch (error) {
         res.status(500).json({ error: "Erro interno do servidor" })
