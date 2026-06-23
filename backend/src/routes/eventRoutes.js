@@ -5,13 +5,15 @@ const authMiddleware = require("../middlewares/authMiddleware")
 
 router.get("/public", eventController.getPublicEvents)
 
-router.use(authMiddleware)
 
-
+// --- ROTAS PÚBLICAS (Sem autenticação) ---
 router.get("/", eventController.getEvents)
 
 router.get("/:id", eventController.getEventById)
 
+router.use(authMiddleware)
+
+// --- ROTAS PRIVADAS (Protegidas pelo authMiddleware) ---
 router.post("/", eventController.createEvent)
 
 router.put("/:id", eventController.updateEvent)
