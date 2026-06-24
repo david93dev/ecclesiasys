@@ -17,6 +17,10 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: [true, "A data é obrigatória"]
     },
+    bannerUrl: { // <-- Novo campo para a imagem do evento
+        type: String,
+        default: "" // Pode começar vazio ou você pode colocar uma imagem padrão aqui
+    },
     responsible: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Member",

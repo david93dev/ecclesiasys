@@ -1,5 +1,36 @@
 const Event = require("../models/Event")
 const Member = require("../models/Member")
+const { bucket } = require("../config/firebase") // <-- Importando o bucket configurado
+
+// Função auxiliar para fazer o upload do arquivo para o Firebase e retornar a URL pública
+const uploadToFirebase = (file) => {
+    return new Promise((resolve, reject) => {
+        if (!file) return resolve("")
+
+        // Cria um nome único usando timestamp para evitar sobreposição de arquivos com o mesmo nome
+        const fileName = `events/${Date.now()}_${file.originalname}`
+        const blob = bucket.file(fileName)
+
+        const blobStream = blob.createWriteStream({
+            metadata: { contentType: file.mimetype }
+        })
+
+        blobStream.on("error", (error) => reject(error))
+
+        blobStream.on("finish", async () => {
+            try {
+                // Torna o arquivo público na nuvem
+                await blob.makePublic()
+                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`
+                resolve(publicUrl)
+            } catch (err) {
+                reject(err)
+            }
+        })
+
+        blobStream.end(file.buffer)
+    })
+}
 
 exports.getPublicEvents = async (req, res) => {
     try {
@@ -7,23 +38,24 @@ exports.getPublicEvents = async (req, res) => {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
         const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
 
+        // Adicionado "bannerUrl" no select das 3 buscas abaixo
         let events = await Event.find({
             date: { $gte: startOfMonth, $lt: startOfNextMonth }
         })
-        .select("title description date")
+        .select("title description date bannerUrl") 
         .sort({ date: 1 })
         .limit(6)
 
         if (events.length === 0) {
             events = await Event.find({ date: { $gte: now } })
-            .select("title description date")
+            .select("title description date bannerUrl")
             .sort({ date: 1 })
             .limit(6)
         }
 
         if (events.length === 0) {
             events = await Event.find()
-            .select("title description date")
+            .select("title description date bannerUrl")
             .sort({ date: -1 })
             .limit(6)
         }
@@ -54,7 +86,7 @@ exports.getEventById = async (req, res) => {
         .populate("participants", "name email phone")
 
         if(!event){
-            return res.status(404).json({message: "Eventro não encontrado"})
+            return res.status(404).json({message: "Evento não encontrado"})
         }
         res.status(200).json(event)
     } catch (error){
@@ -64,23 +96,35 @@ exports.getEventById = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
     try{
-        const {responsible, participants} = req.body
+        const { title, description, date, responsible, participants } = req.body
 
         const responsibleExists = await Member.findById(responsible)
-
         if(!responsibleExists) {
             return res.status(400).json({ message: "O responsável informado não existe"})
         }
 
         if(participants && participants.length > 0){
             const foundParticipants = await Member.find({_id: {$in: participants}})
-
             if(foundParticipants.length !== participants.length){
                 return res.status(400).json({ message: "Um ou mais participantes não existe"})
             }
         }
 
-        const event = await Event.create(req.body)
+        // --- LÓGICA DO FIREBASE UPONTADA AQUI ---
+        let bannerUrl = ""
+        if (req.file) {
+            bannerUrl = await uploadToFirebase(req.file)
+        }
+
+        // Criamos o evento mesclando os dados textuais com a URL gerada
+        const event = await Event.create({
+            title,
+            description,
+            date,
+            responsible,
+            participants,
+            bannerUrl
+        })
 
         const populatedEvent = await Event.findById(event._id)
         .populate("responsible", "name email phone")
@@ -94,7 +138,6 @@ exports.createEvent = async (req, res) => {
             const errors = Object.values(error.errors).map(err => err.message)
             return res.status(400).json({errors})
         }
-
         res.status(500).json({error: "Erro interno do servidor"})
     }
 }
@@ -105,21 +148,28 @@ exports.updateEvent = async (req, res) => {
 
         if(responsible !== undefined) {
             const responsibleExists = await Member.findById(responsible)
-
             if(!responsibleExists){
-                return res.status(400).json({message: "O responsável infornado não existe"})
+                return res.status(400).json({message: "O responsável informado não existe"})
             }
         }
         if (participants !== undefined){
             const foundParticipants = await Member.find({_id: { $in: participants}})
-
             if(foundParticipants.length !== participants.length){
-                return res.status(400).json({message: "Um ou mais participantes não exsite"})
+                return res.status(400).json({message: "Um ou mais participantes não existe"})
             }
         }
+
+        // Criamos um objeto com o que veio no body para atualizar
+        const updateData = { ...req.body }
+
+        // Se uma nova foto foi enviada no update, fazemos o upload dela
+        if (req.file) {
+            updateData.bannerUrl = await uploadToFirebase(req.file)
+        }
+
         const event = await Event.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            updateData, // Passamos o updateData em vez do req.body bruto
             {
                 new: true,
                 runValidators: true
@@ -133,7 +183,6 @@ exports.updateEvent = async (req, res) => {
         }
         res.status(200).json(event)
     } catch(error){ 
-
         if(error.name === "ValidationError"){
             const errors = Object.values(error.errors).map(err => err.message)
             return res.status(400).json({errors})
@@ -142,7 +191,6 @@ exports.updateEvent = async (req, res) => {
     }
 }
 
-
 exports.deleteEvent = async (req, res) => {
     try{
         const event = await Event.findByIdAndDelete(req.params.id)
@@ -150,6 +198,10 @@ exports.deleteEvent = async (req, res) => {
         if(!event){
             return res.status(400).json({message: "Evento não encontrado"})
         }
+        
+        // [Opcional] Você pode adicionar uma lógica aqui para deletar o arquivo do Firebase 
+        // usando a URL salva nele se quiser economizar espaço no Storage no futuro.
+
         res.status(200).json({message: "Evento deletado com sucesso"})
     } catch(error){
         res.status(500).json({error: "Erro interno do servidor"})
