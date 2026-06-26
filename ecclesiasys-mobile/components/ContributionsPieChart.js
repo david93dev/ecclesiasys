@@ -19,13 +19,13 @@ export function ContributionsPieChart({ data }) {
   }));
 
   return (
-    <View className="mb-5 rounded-2xl bg-slate-800 p-5">
+    <View className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <View className="mb-5">
-        <Text className="text-lg font-bold text-white">
+        <Text className="text-lg font-bold text-slate-950">
           {data.title}
         </Text>
 
-        <Text className="text-slate-400">
+        <Text className="text-slate-500">
           {data.subtitle}
         </Text>
       </View>
@@ -35,7 +35,7 @@ export function ContributionsPieChart({ data }) {
         donut
         radius={110}
         innerRadius={55}
-        textColor="white"
+        textColor="#334155"
         showText
         focusOnPress
       />

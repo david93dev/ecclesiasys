@@ -9,24 +9,23 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { memberService } from "../../../services/memberService";
+import { contributionService } from "../../../services/contributionService";
 
-const MEMBERS_ROUTE = "/(drawer)/members";
-const getEditMemberRoute = (memberId) => `/(drawer)/members/edit/${memberId}`;
+const CONTRIBUTIONS_ROUTE = "/(drawer)/contributions";
+const getEditContributionRoute = (contributionId) =>
+  `/(drawer)/contributions/edit/${contributionId}`;
 
-const formatPhone = (phone) => {
-  const digits = String(phone || "").replace(/\D/g, "");
-
-  if (digits.length === 11) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-
-  return phone || "Nao informado";
+const typeLabels = {
+  tithe: "Dizimo",
+  offering: "Oferta",
+  missions: "Missoes",
 };
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(value || 0));
 
 const formatDate = (date) => {
   if (!date) return "Nao informado";
@@ -34,20 +33,20 @@ const formatDate = (date) => {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(date));
 };
 
-export default function MemberDetails() {
+export default function ContributionDetails() {
   const { id } = useLocalSearchParams();
-  const [member, setMember] = useState(null);
+  const [contribution, setContribution] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMember = useCallback(async () => {
+  const fetchContribution = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await memberService.getMemberById(id);
-      setMember(data);
+      const data = await contributionService.getContributionById(id);
+      setContribution(data);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Nao foi possivel carregar os detalhes do membro.");
-      router.replace(MEMBERS_ROUTE);
+      Alert.alert("Erro", "Nao foi possivel carregar a contribuicao.");
+      router.replace(CONTRIBUTIONS_ROUTE);
     } finally {
       setLoading(false);
     }
@@ -55,14 +54,14 @@ export default function MemberDetails() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchMember();
-    }, [fetchMember])
+      fetchContribution();
+    }, [fetchContribution])
   );
 
   const handleDelete = () => {
     Alert.alert(
-      "Excluir membro",
-      "Tem certeza que deseja excluir este membro? Esta acao nao pode ser desfeita.",
+      "Excluir contribuicao",
+      "Tem certeza que deseja excluir esta contribuicao? Esta acao nao pode ser desfeita.",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -70,12 +69,12 @@ export default function MemberDetails() {
           style: "destructive",
           onPress: async () => {
             try {
-              await memberService.deleteMember(id);
-              Alert.alert("Sucesso", "Membro excluido com sucesso.");
-              router.replace(MEMBERS_ROUTE);
+              await contributionService.deleteContribution(id);
+              Alert.alert("Sucesso", "Contribuicao excluida com sucesso.");
+              router.replace(CONTRIBUTIONS_ROUTE);
             } catch (error) {
               console.error(error);
-              Alert.alert("Erro", "Nao foi possivel excluir o membro.");
+              Alert.alert("Erro", "Nao foi possivel excluir a contribuicao.");
             }
           },
         },
@@ -87,78 +86,71 @@ export default function MemberDetails() {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#0f172a" />
-        <Text className="mt-3 text-sm text-slate-500">Carregando membro</Text>
+        <Text className="mt-3 text-sm text-slate-500">
+          Carregando contribuicao
+        </Text>
       </View>
     );
   }
 
-  if (!member) return null;
-
-  const isInactive = member.status === "inactive";
+  if (!contribution) return null;
 
   return (
     <ScrollView
       className="flex-1 bg-slate-50"
       contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
     >
-      <View className="mb-5 flex-row items-center justify-between">
-        <TouchableOpacity
-          onPress={() => router.replace(MEMBERS_ROUTE)}
-          className="size-10 items-center justify-center rounded-lg border border-slate-200 bg-white"
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={20} color="#334155" />
-        </TouchableOpacity>
-
-        <View
-          className={`rounded-full px-3 py-1 ${
-            isInactive ? "bg-red-100" : "bg-green-100"
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              isInactive ? "text-red-700" : "text-green-700"
-            }`}
-          >
-            {isInactive ? "inativo" : "ativo"}
-          </Text>
-        </View>
-      </View>
+      <TouchableOpacity
+        onPress={() => router.replace(CONTRIBUTIONS_ROUTE)}
+        className="mb-5 size-10 items-center justify-center rounded-lg border border-slate-200 bg-white"
+        activeOpacity={0.8}
+      >
+        <Ionicons name="arrow-back" size={20} color="#334155" />
+      </TouchableOpacity>
 
       <View className="mb-5 items-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <View className="mb-4 size-24 items-center justify-center rounded-full border-4 border-amber-400 bg-slate-100">
-          <Ionicons name="person" size={46} color="#b45309" />
+          <Ionicons name="cash" size={46} color="#b45309" />
         </View>
 
-        <Text className="text-center text-2xl font-bold text-slate-950">
-          {member.name}
+        <Text className="text-center text-3xl font-bold text-slate-950">
+          {formatCurrency(contribution.amount)}
         </Text>
         <Text className="mt-1 text-center text-sm text-slate-500">
-          Dados cadastrais do membro
+          {typeLabels[contribution.type] || contribution.type}
         </Text>
       </View>
 
       <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <Text className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-          Informacoes de contato
+          Informacoes financeiras
         </Text>
 
-        <InfoRow icon="mail" label="Email" value={member.email} />
+        <InfoRow icon="person" label="Membro" value={contribution.member?.name} />
         <Divider />
-        <InfoRow icon="call" label="Telefone" value={formatPhone(member.phone)} />
+        <InfoRow icon="mail" label="Email" value={contribution.member?.email} />
         <Divider />
         <InfoRow
           icon="calendar"
-          label="Data de nascimento"
-          value={formatDate(member.birthDate)}
+          label="Data"
+          value={formatDate(contribution.date)}
         />
+      </View>
+
+      <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <Text className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          Observacao
+        </Text>
+        <Text className="text-base leading-6 text-slate-700">
+          {contribution.note || "Nao informado"}
+        </Text>
       </View>
 
       <View className="flex-row gap-3">
         <TouchableOpacity
           className="h-14 flex-1 flex-row items-center justify-center rounded-xl bg-slate-950"
           activeOpacity={0.85}
-          onPress={() => router.push(getEditMemberRoute(id))}
+          onPress={() => router.push(getEditContributionRoute(id))}
         >
           <MaterialIcons name="edit" size={20} color="#fbbf24" />
           <Text className="ml-2 text-base font-bold text-white">Editar</Text>

@@ -11,44 +11,32 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { memberService } from "../../../services/memberService";
+import { ministryService } from "../../../services/ministryService";
 
-const CREATE_MEMBER_ROUTE = "/(drawer)/members/create";
-const getMemberDetailsRoute = (memberId) => `/(drawer)/members/${memberId}`;
-const getEditMemberRoute = (memberId) => `/(drawer)/members/edit/${memberId}`;
+const CREATE_MINISTRY_ROUTE = "/(drawer)/ministries/create";
+const getMinistryDetailsRoute = (ministryId) => `/(drawer)/ministries/${ministryId}`;
+const getEditMinistryRoute = (ministryId) =>
+  `/(drawer)/ministries/edit/${ministryId}`;
 
-const formatPhone = (phone) => {
-  const digits = String(phone || "").replace(/\D/g, "");
+const getLeaderName = (ministry) => ministry.leader?.name || "Sem lider";
+const getStatusLabel = (status) => (status === "inactive" ? "inativo" : "ativo");
 
-  if (digits.length === 11) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-
-  return phone || "-";
-};
-
-const getMemberName = (member) => member.name || member.nome || "-";
-
-export default function MembersList() {
-  const [members, setMembers] = useState([]);
+export default function MinistriesList() {
+  const [ministries, setMinistries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
 
-  const fetchMembers = useCallback(async ({ showLoading = true } = {}) => {
+  const fetchMinistries = useCallback(async ({ showLoading = true } = {}) => {
     try {
       if (showLoading) setLoading(true);
 
-      const data = await memberService.getMembers();
-      setMembers(data || []);
+      const data = await ministryService.getMinistries();
+      setMinistries(data || []);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Nao foi possivel carregar os membros.");
+      Alert.alert("Erro", "Nao foi possivel carregar os ministerios.");
     } finally {
       setLoading(false);
     }
@@ -56,32 +44,33 @@ export default function MembersList() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchMembers({ showLoading: false });
+    await fetchMinistries({ showLoading: false });
     setRefreshing(false);
-  }, [fetchMembers]);
+  }, [fetchMinistries]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchMembers();
-    }, [fetchMembers])
+      fetchMinistries();
+    }, [fetchMinistries])
   );
 
-  const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
-      const name = getMemberName(member).toLowerCase();
-      const email = String(member.email || "").toLowerCase();
+  const filteredMinistries = useMemo(() => {
+    return ministries.filter((ministry) => {
       const query = search.toLowerCase();
-      const matchesSearch = name.includes(query) || email.includes(query);
-      const matchesStatus = !status || member.status === status;
+      const matchesSearch =
+        String(ministry.name || "").toLowerCase().includes(query) ||
+        String(ministry.description || "").toLowerCase().includes(query) ||
+        getLeaderName(ministry).toLowerCase().includes(query);
+      const matchesStatus = !status || ministry.status === status;
 
       return matchesSearch && matchesStatus;
     });
-  }, [members, search, status]);
+  }, [ministries, search, status]);
 
-  const handleDelete = (member) => {
+  const handleDelete = (ministry) => {
     Alert.alert(
-      "Excluir membro",
-      `Deseja realmente excluir ${getMemberName(member)}?`,
+      "Excluir ministerio",
+      `Deseja realmente excluir ${ministry.name || "este ministerio"}?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -89,11 +78,11 @@ export default function MembersList() {
           style: "destructive",
           onPress: async () => {
             try {
-              await memberService.deleteMember(member._id);
-              await fetchMembers({ showLoading: false });
+              await ministryService.deleteMinistry(ministry._id);
+              await fetchMinistries({ showLoading: false });
             } catch (error) {
               console.error(error);
-              Alert.alert("Erro", "Nao foi possivel excluir o membro.");
+              Alert.alert("Erro", "Nao foi possivel excluir o ministerio.");
             }
           },
         },
@@ -105,7 +94,9 @@ export default function MembersList() {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#0f172a" />
-        <Text className="mt-3 text-sm text-slate-500">Carregando membros</Text>
+        <Text className="mt-3 text-sm text-slate-500">
+          Carregando ministerios
+        </Text>
       </View>
     );
   }
@@ -126,21 +117,21 @@ export default function MembersList() {
         <View className="mb-6 gap-4">
           <View>
             <Text className="text-2xl font-bold text-slate-950">
-              Gestao de Membros
+              Gestao de Ministerios
             </Text>
             <Text className="mt-1 text-sm text-slate-500">
-              Cadastre, edite e gerencie os membros
+              Cadastre e gerencie os ministerios da igreja
             </Text>
           </View>
 
           <TouchableOpacity
             className="h-11 flex-row items-center justify-center rounded-lg bg-slate-950 px-4"
             activeOpacity={0.85}
-            onPress={() => router.push(CREATE_MEMBER_ROUTE)}
+            onPress={() => router.push(CREATE_MINISTRY_ROUTE)}
           >
             <Ionicons name="add" size={18} color="#fbbf24" />
             <Text className="ml-2 text-sm font-semibold text-white">
-              Novo Membro
+              Novo Ministerio
             </Text>
           </TouchableOpacity>
         </View>
@@ -148,7 +139,7 @@ export default function MembersList() {
         <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <View className="mb-4">
             <Text className="mb-1.5 text-sm font-semibold text-slate-600">
-              Buscar por nome
+              Buscar por ministerio
             </Text>
             <View className="h-12 flex-row items-center rounded-xl border border-slate-200 bg-slate-100 px-3">
               <Ionicons name="search" size={18} color="#64748b" />
@@ -203,29 +194,29 @@ export default function MembersList() {
         </View>
 
         <View className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {filteredMembers.length === 0 ? (
+          {filteredMinistries.length === 0 ? (
             <View className="items-center justify-center px-6 py-14">
-              <Ionicons name="people-outline" size={56} color="#cbd5e1" />
+              <Ionicons name="albums-outline" size={56} color="#cbd5e1" />
               <Text className="mt-4 text-base font-semibold text-slate-600">
-                Nenhum membro encontrado
+                Nenhum ministerio encontrado
               </Text>
               <Text className="mt-1 text-center text-sm text-slate-400">
-                Ajuste os filtros ou cadastre um novo membro.
+                Ajuste os filtros ou cadastre um novo ministerio.
               </Text>
             </View>
           ) : (
             <>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="w-[760px]">
+                <View className="w-[720px]">
                   <View className="h-12 flex-row items-center bg-slate-200 px-4">
-                    <Text className="w-[180px] text-xs font-bold uppercase tracking-wide text-slate-600">
-                      Nome
+                    <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                      Ministerio
                     </Text>
-                    <Text className="w-[220px] text-xs font-bold uppercase tracking-wide text-slate-600">
-                      Email
+                    <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                      Responsavel
                     </Text>
-                    <Text className="w-[150px] text-xs font-bold uppercase tracking-wide text-slate-600">
-                      Telefone
+                    <Text className="w-[120px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                      Membros
                     </Text>
                     <Text className="w-[100px] text-xs font-bold uppercase tracking-wide text-slate-600">
                       Status
@@ -235,44 +226,44 @@ export default function MembersList() {
                     </Text>
                   </View>
 
-                  {filteredMembers.map((member) => (
+                  {filteredMinistries.map((ministry) => (
                     <TouchableOpacity
-                      key={member._id}
+                      key={ministry._id}
                       className="min-h-16 flex-row items-center border-t border-slate-100 px-4 py-3"
                       activeOpacity={0.75}
-                      onPress={() => router.push(getMemberDetailsRoute(member._id))}
+                      onPress={() => router.push(getMinistryDetailsRoute(ministry._id))}
                     >
                       <Text
-                        className="w-[180px] pr-4 text-sm font-semibold text-slate-800"
+                        className="w-[190px] pr-4 text-sm font-semibold text-slate-800"
                         numberOfLines={2}
                       >
-                        {getMemberName(member)}
+                        {ministry.name || "-"}
                       </Text>
                       <Text
-                        className="w-[220px] pr-4 text-sm text-slate-600"
+                        className="w-[190px] pr-4 text-sm text-slate-600"
                         numberOfLines={2}
                       >
-                        {member.email || "-"}
+                        {getLeaderName(ministry)}
                       </Text>
-                      <Text className="w-[150px] text-sm text-slate-600">
-                        {formatPhone(member.phone)}
+                      <Text className="w-[120px] text-sm text-slate-600">
+                        {ministry.members?.length || 0}
                       </Text>
                       <View className="w-[100px]">
                         <View
                           className={`self-start rounded-full px-3 py-1 ${
-                            member.status === "inactive"
+                            ministry.status === "inactive"
                               ? "bg-red-100"
                               : "bg-green-100"
                           }`}
                         >
                           <Text
                             className={`text-xs font-bold ${
-                              member.status === "inactive"
+                              ministry.status === "inactive"
                                 ? "text-red-700"
                                 : "text-green-700"
                             }`}
                           >
-                            {member.status === "inactive" ? "inativo" : "ativo"}
+                            {getStatusLabel(ministry.status)}
                           </Text>
                         </View>
                       </View>
@@ -282,7 +273,7 @@ export default function MembersList() {
                           activeOpacity={0.8}
                           onPress={(event) => {
                             event.stopPropagation();
-                            router.push(getEditMemberRoute(member._id));
+                            router.push(getEditMinistryRoute(ministry._id));
                           }}
                         >
                           <MaterialIcons name="edit" size={18} color="#475569" />
@@ -292,10 +283,14 @@ export default function MembersList() {
                           activeOpacity={0.8}
                           onPress={(event) => {
                             event.stopPropagation();
-                            handleDelete(member);
+                            handleDelete(ministry);
                           }}
                         >
-                          <MaterialIcons name="delete-outline" size={19} color="#dc2626" />
+                          <MaterialIcons
+                            name="delete-outline"
+                            size={19}
+                            color="#dc2626"
+                          />
                         </TouchableOpacity>
                       </View>
                     </TouchableOpacity>
@@ -307,7 +302,7 @@ export default function MembersList() {
                 <Text className="text-sm text-slate-500">
                   Total de registros:{" "}
                   <Text className="font-bold text-slate-700">
-                    {filteredMembers.length}
+                    {filteredMinistries.length}
                   </Text>
                 </Text>
               </View>

@@ -1,27 +1,46 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { memberService } from "../../../../services/memberService";
+
+const getMemberDetailsRoute = (memberId) => `/(drawer)/members/${memberId}`;
+
+const formatDateForInput = (date) => {
+  if (!date) return "";
+
+  return new Intl.DateTimeFormat("pt-BR").format(new Date(date));
+};
+
+const parseBirthDate = (value) => {
+  if (!value) return null;
+
+  const [day, month, year] = value.split("/");
+
+  if (!day || !month || !year) return value;
+
+  return new Date(`${year}-${month}-${day}`);
+};
 
 export default function EditMember() {
   const { id } = useLocalSearchParams();
   const [form, setForm] = useState({
-      name: "",
-      email: "",
-      phone: "",
-      birthDate: "",
-    });
+    name: "",
+    email: "",
+    phone: "",
+    birthDate: "",
+    status: "active",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -33,12 +52,13 @@ export default function EditMember() {
           name: data.name || "",
           email: data.email || "",
           phone: data.phone || "",
-          birthDate: data.birthDate || "",
+          birthDate: formatDateForInput(data.birthDate),
+          status: data.status || "active",
         });
       } catch (error) {
         console.error(error);
-        Alert.alert("Erro", "Não foi possível carregar os dados do membro.");
-        router.back();
+        Alert.alert("Erro", "Nao foi possivel carregar os dados do membro.");
+        router.replace(getMemberDetailsRoute(id));
       } finally {
         setLoading(false);
       }
@@ -47,36 +67,51 @@ export default function EditMember() {
     fetchMember();
   }, [id]);
 
+  const updateField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
   const handleUpdate = async () => {
-  if (!form.name || !form.email) {
-    Alert.alert("Erro", "Name e E-mail são obrigatórios.");
-    return;
-  }
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      Alert.alert("Erro", "Nome, email e telefone sao obrigatorios.");
+      return;
+    }
 
-  try {
-    setSaving(true);
+    try {
+      setSaving(true);
 
-    await memberService.updateMember(id, {
-      ...form,
-      birthDate: form.birthDate
-        ? new Date(form.birthDate.split("/").reverse().join("-"))
-        : null,
-    });
+      await memberService.updateMember(id, {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.replace(/\D/g, ""),
+        birthDate: parseBirthDate(form.birthDate),
+        status: form.status,
+      });
 
-    Alert.alert("Sucesso", "Membro atualizado com sucesso!");
-    router.replace(`/members/${id}`);
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Erro", "Não foi possível atualizar o membro.");
-  } finally {
-    setSaving(false);
-  }
-};
+      Alert.alert("Sucesso", "Membro atualizado com sucesso!");
+      router.replace(getMemberDetailsRoute(id));
+    } catch (error) {
+      console.error(error);
+
+      const message =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        "Nao foi possivel atualizar o membro.";
+
+      Alert.alert("Erro", message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
-      <View className="flex-1 bg-slate-900 items-center justify-center">
-        <ActivityIndicator size="large" color="#fbbf24" />
+      <View className="flex-1 items-center justify-center bg-slate-50">
+        <ActivityIndicator size="large" color="#0f172a" />
+        <Text className="mt-3 text-sm text-slate-500">Carregando membro</Text>
       </View>
     );
   }
@@ -84,62 +119,119 @@ export default function EditMember() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-slate-900"
+      className="flex-1 bg-slate-50"
     >
-      <ScrollView className="flex-1 p-6">
-        <View className="mb-8">
-          <Text className="text-white text-2xl font-bold">Editar Membro</Text>
-          <Text className="text-slate-400 mt-1">Altere os dados desejados abaixo</Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="mb-6">
+          <TouchableOpacity
+            className="mb-5 h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white"
+            activeOpacity={0.8}
+            onPress={() => router.replace(getMemberDetailsRoute(id))}
+          >
+            <Ionicons name="arrow-back" size={20} color="#334155" />
+          </TouchableOpacity>
+
+          <Text className="text-2xl font-bold text-slate-950">Editar Membro</Text>
+          <Text className="mt-1 text-sm text-slate-500">
+            Altere os dados desejados abaixo
+          </Text>
         </View>
 
-        <View className="space-y-4">
+        <View className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <FormField
-            label="name Completo *"
+            label="Nome completo"
+            required
             icon="person"
-            placeholder="Ex: João Silva"
+            placeholder="Ex: Joao Silva"
             value={form.name}
-            onChangeText={(val) => setForm({ ...form, name: val })}
+            onChangeText={(value) => updateField("name", value)}
           />
 
           <FormField
-            label="E-mail *"
+            label="Email"
+            required
             icon="mail"
             placeholder="exemplo@email.com"
             keyboardType="email-address"
+            autoCapitalize="none"
             value={form.email}
-            onChangeText={(val) => setForm({ ...form, email: val })}
+            onChangeText={(value) => updateField("email", value)}
           />
 
           <FormField
-            label="phone"
+            label="Telefone"
+            required
             icon="call"
             placeholder="(00) 00000-0000"
             keyboardType="phone-pad"
             value={form.phone}
-            onChangeText={(val) => setForm({ ...form, phone: val })}
+            onChangeText={(value) => updateField("phone", value)}
           />
-
 
           <FormField
-            label="Data de Nascimento"
+            label="Data de nascimento"
             icon="calendar"
             placeholder="DD/MM/AAAA"
+            keyboardType="numeric"
             value={form.birthDate}
-            onChangeText={(val) => setForm({ ...form, birthDate: val })}
+            onChangeText={(value) => updateField("birthDate", value)}
           />
 
-          
+          <View>
+            <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+              Status
+            </Text>
+            <View className="flex-row gap-2">
+              {[
+                { label: "Ativo", value: "active" },
+                { label: "Inativo", value: "inactive" },
+              ].map((option) => {
+                const selected = form.status === option.value;
+
+                return (
+                  <TouchableOpacity
+                    key={option.value}
+                    className={`flex-1 rounded-xl border px-4 py-3 ${
+                      selected
+                        ? "border-slate-950 bg-slate-950"
+                        : "border-slate-200 bg-slate-100"
+                    }`}
+                    activeOpacity={0.85}
+                    onPress={() => updateField("status", option.value)}
+                  >
+                    <Text
+                      className={`text-center text-sm font-semibold ${
+                        selected ? "text-white" : "text-slate-600"
+                      }`}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         <TouchableOpacity
-          className="bg-amber-500 h-14 rounded-xl items-center justify-center mt-8 mb-12 shadow-lg"
+          className="mt-6 h-14 flex-row items-center justify-center rounded-xl bg-slate-950"
+          activeOpacity={0.85}
           onPress={handleUpdate}
           disabled={saving}
         >
           {saving ? (
-            <ActivityIndicator color="#0f172a" />
+            <ActivityIndicator color="#fbbf24" />
           ) : (
-            <Text className="text-slate-900 font-bold text-lg">Salvar Alterações</Text>
+            <>
+              <Ionicons name="save" size={20} color="#fbbf24" />
+              <Text className="ml-2 text-base font-bold text-white">
+                Salvar Alteracoes
+              </Text>
+            </>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -147,17 +239,19 @@ export default function EditMember() {
   );
 }
 
-function FormField({ label, icon, ...props }) {
+function FormField({ label, required = false, icon, ...props }) {
   return (
-    <View className="mb-4">
-      <Text className="text-slate-400 mb-2 ml-1 text-xs font-bold uppercase">{label}</Text>
-      <View className="bg-slate-800 flex-row items-center px-4 rounded-xl border border-slate-700">
-        <Ionicons name={icon} size={20} color="#94a3b8" />
+    <View className="mb-5">
+      <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+        {label}
+        {required ? " *" : ""}
+      </Text>
+      <View className="h-12 flex-row items-center rounded-xl border border-slate-200 bg-slate-100 px-4">
+        <Ionicons name={icon} size={20} color="#64748b" />
         <TextInput
-          className="flex-1 h-12 ml-3 text-white"
-          placeholderTextColor="#475569"
+          className="ml-3 flex-1 text-base text-slate-900"
+          placeholderTextColor="#94a3b8"
           {...props}
-          style={props.multiline ? { height: 80, textAlignVertical: 'top', paddingTop: 10 } : { height: 48 }}
         />
       </View>
     </View>

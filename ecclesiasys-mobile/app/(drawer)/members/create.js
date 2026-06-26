@@ -1,31 +1,53 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { memberService } from "../../../services/memberService";
 
+const MEMBERS_ROUTE = "/(drawer)/members";
+
+const initialForm = {
+  name: "",
+  email: "",
+  phone: "",
+  birthDate: "",
+  status: "active",
+};
+
+const parseBirthDate = (value) => {
+  if (!value) return null;
+
+  const [day, month, year] = value.split("/");
+
+  if (!day || !month || !year) return value;
+
+  return new Date(`${year}-${month}-${day}`);
+};
+
 export default function CreateMember() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-  });
+  const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
 
+  const updateField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
   const handleSave = async () => {
-    if (!form.name || !form.email) {
-      Alert.alert("Erro", "Nome e E-mail são obrigatórios.");
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      Alert.alert("Erro", "Nome, email e telefone sao obrigatorios.");
       return;
     }
 
@@ -33,17 +55,24 @@ export default function CreateMember() {
       setLoading(true);
 
       await memberService.createMember({
-        ...form,
-        birthDate: form.birthDate
-        ? new Date(form.birthDate.split("/").reverse().join("-"))
-        : null,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.replace(/\D/g, ""),
+        birthDate: parseBirthDate(form.birthDate),
+        status: form.status,
       });
 
       Alert.alert("Sucesso", "Membro cadastrado com sucesso!");
-      router.replace("/members");
+      router.replace(MEMBERS_ROUTE);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Não foi possível cadastrar o membro.");
+
+      const message =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        "Nao foi possivel cadastrar o membro.";
+
+      Alert.alert("Erro", message);
     } finally {
       setLoading(false);
     }
@@ -52,60 +81,119 @@ export default function CreateMember() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-slate-900"
+      className="flex-1 bg-slate-50"
     >
-      <ScrollView className="flex-1 p-6">
-        <View className="mb-8">
-          <Text className="text-white text-2xl font-bold">Novo Membro</Text>
-          <Text className="text-slate-400 mt-1">Preencha os dados abaixo para cadastrar</Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="mb-6">
+          <TouchableOpacity
+            className="mb-5 h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white"
+            activeOpacity={0.8}
+            onPress={() => router.replace(MEMBERS_ROUTE)}
+          >
+            <Ionicons name="arrow-back" size={20} color="#334155" />
+          </TouchableOpacity>
+
+          <Text className="text-2xl font-bold text-slate-950">Novo Membro</Text>
+          <Text className="mt-1 text-sm text-slate-500">
+            Preencha os dados abaixo para cadastrar
+          </Text>
         </View>
 
-        <View className="space-y-4">
+        <View className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <FormField
-            label="Nome Completo *"
+            label="Nome completo"
+            required
             icon="person"
-            placeholder="Ex: João Silva"
+            placeholder="Ex: Joao Silva"
             value={form.name}
-            onChangeText={(val) => setForm({ ...form, name: val })}
+            onChangeText={(value) => updateField("name", value)}
           />
 
           <FormField
-            label="E-mail *"
+            label="Email"
+            required
             icon="mail"
             placeholder="exemplo@email.com"
             keyboardType="email-address"
+            autoCapitalize="none"
             value={form.email}
-            onChangeText={(val) => setForm({ ...form, email: val })}
+            onChangeText={(value) => updateField("email", value)}
           />
 
           <FormField
             label="Telefone"
+            required
             icon="call"
             placeholder="(00) 00000-0000"
             keyboardType="phone-pad"
             value={form.phone}
-            onChangeText={(val) => setForm({ ...form, phone: val })}
+            onChangeText={(value) => updateField("phone", value)}
           />
 
           <FormField
-            label="Data de Nascimento"
+            label="Data de nascimento"
             icon="calendar"
             placeholder="DD/MM/AAAA"
+            keyboardType="numeric"
             value={form.birthDate}
-            onChangeText={(val) => setForm({ ...form, birthDate: val })}
+            onChangeText={(value) => updateField("birthDate", value)}
           />
 
+          <View>
+            <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+              Status
+            </Text>
+            <View className="flex-row gap-2">
+              {[
+                { label: "Ativo", value: "active" },
+                { label: "Inativo", value: "inactive" },
+              ].map((option) => {
+                const selected = form.status === option.value;
+
+                return (
+                  <TouchableOpacity
+                    key={option.value}
+                    className={`flex-1 rounded-xl border px-4 py-3 ${
+                      selected
+                        ? "border-slate-950 bg-slate-950"
+                        : "border-slate-200 bg-slate-100"
+                    }`}
+                    activeOpacity={0.85}
+                    onPress={() => updateField("status", option.value)}
+                  >
+                    <Text
+                      className={`text-center text-sm font-semibold ${
+                        selected ? "text-white" : "text-slate-600"
+                      }`}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         <TouchableOpacity
-          className="bg-amber-500 h-14 rounded-xl items-center justify-center mt-8 mb-12 shadow-lg"
+          className="mt-6 h-14 flex-row items-center justify-center rounded-xl bg-slate-950"
+          activeOpacity={0.85}
           onPress={handleSave}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#0f172a" />
+            <ActivityIndicator color="#fbbf24" />
           ) : (
-            <Text className="text-slate-900 font-bold text-lg">Cadastrar Membro</Text>
+            <>
+              <Ionicons name="checkmark-circle" size={20} color="#fbbf24" />
+              <Text className="ml-2 text-base font-bold text-white">
+                Cadastrar Membro
+              </Text>
+            </>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -113,17 +201,19 @@ export default function CreateMember() {
   );
 }
 
-function FormField({ label, icon, ...props }) {
+function FormField({ label, required = false, icon, ...props }) {
   return (
-    <View className="mb-4">
-      <Text className="text-slate-400 mb-2 ml-1 text-xs font-bold uppercase">{label}</Text>
-      <View className="bg-slate-800 flex-row items-center px-4 rounded-xl border border-slate-700">
-        <Ionicons name={icon} size={20} color="#94a3b8" />
+    <View className="mb-5">
+      <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+        {label}
+        {required ? " *" : ""}
+      </Text>
+      <View className="h-12 flex-row items-center rounded-xl border border-slate-200 bg-slate-100 px-4">
+        <Ionicons name={icon} size={20} color="#64748b" />
         <TextInput
-          className="flex-1 h-12 ml-3 text-white"
-          placeholderTextColor="#475569"
+          className="ml-3 flex-1 text-base text-slate-900"
+          placeholderTextColor="#94a3b8"
           {...props}
-          style={props.multiline ? { height: 80, textAlignVertical: 'top', paddingTop: 10 } : { height: 48 }}
         />
       </View>
     </View>

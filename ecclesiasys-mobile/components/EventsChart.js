@@ -16,13 +16,13 @@ export function EventsChart({ data }) {
   }));
 
   return (
-    <View className="mb-5 rounded-2xl bg-slate-800 p-5">
+    <View className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <View className="mb-5">
-        <Text className="text-lg font-bold text-white">
+        <Text className="text-lg font-bold text-slate-950">
           {data.title}
         </Text>
 
-        <Text className="text-slate-400">
+        <Text className="text-slate-500">
           {data.subtitle}
         </Text>
       </View>
@@ -33,14 +33,14 @@ export function EventsChart({ data }) {
         spacing={24}
         roundedTop
         hideRules={false}
-        xAxisColor="#64748b"
-        yAxisColor="#64748b"
-        rulesColor="#334155"
+        xAxisColor="#cbd5e1"
+        yAxisColor="#cbd5e1"
+        rulesColor="#e2e8f0"
         yAxisTextStyle={{
-          color: "#cbd5e1",
+          color: "#64748b",
         }}
         xAxisLabelTextStyle={{
-          color: "#cbd5e1",
+          color: "#64748b",
         }}
       />
     </View>

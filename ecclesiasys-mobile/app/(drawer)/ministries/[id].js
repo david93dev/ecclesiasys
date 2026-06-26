@@ -9,45 +9,28 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { memberService } from "../../../services/memberService";
+import { ministryService } from "../../../services/ministryService";
 
-const MEMBERS_ROUTE = "/(drawer)/members";
-const getEditMemberRoute = (memberId) => `/(drawer)/members/edit/${memberId}`;
+const MINISTRIES_ROUTE = "/(drawer)/ministries";
+const getEditMinistryRoute = (ministryId) =>
+  `/(drawer)/ministries/edit/${ministryId}`;
 
-const formatPhone = (phone) => {
-  const digits = String(phone || "").replace(/\D/g, "");
+const getLeaderName = (ministry) => ministry?.leader?.name || "Sem lider";
 
-  if (digits.length === 11) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-
-  return phone || "Nao informado";
-};
-
-const formatDate = (date) => {
-  if (!date) return "Nao informado";
-
-  return new Intl.DateTimeFormat("pt-BR").format(new Date(date));
-};
-
-export default function MemberDetails() {
+export default function MinistryDetails() {
   const { id } = useLocalSearchParams();
-  const [member, setMember] = useState(null);
+  const [ministry, setMinistry] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMember = useCallback(async () => {
+  const fetchMinistry = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await memberService.getMemberById(id);
-      setMember(data);
+      const data = await ministryService.getMinistryById(id);
+      setMinistry(data);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Nao foi possivel carregar os detalhes do membro.");
-      router.replace(MEMBERS_ROUTE);
+      Alert.alert("Erro", "Nao foi possivel carregar os detalhes do ministerio.");
+      router.replace(MINISTRIES_ROUTE);
     } finally {
       setLoading(false);
     }
@@ -55,14 +38,14 @@ export default function MemberDetails() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchMember();
-    }, [fetchMember])
+      fetchMinistry();
+    }, [fetchMinistry])
   );
 
   const handleDelete = () => {
     Alert.alert(
-      "Excluir membro",
-      "Tem certeza que deseja excluir este membro? Esta acao nao pode ser desfeita.",
+      "Excluir ministerio",
+      "Tem certeza que deseja excluir este ministerio? Esta acao nao pode ser desfeita.",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -70,12 +53,12 @@ export default function MemberDetails() {
           style: "destructive",
           onPress: async () => {
             try {
-              await memberService.deleteMember(id);
-              Alert.alert("Sucesso", "Membro excluido com sucesso.");
-              router.replace(MEMBERS_ROUTE);
+              await ministryService.deleteMinistry(id);
+              Alert.alert("Sucesso", "Ministerio excluido com sucesso.");
+              router.replace(MINISTRIES_ROUTE);
             } catch (error) {
               console.error(error);
-              Alert.alert("Erro", "Nao foi possivel excluir o membro.");
+              Alert.alert("Erro", "Nao foi possivel excluir o ministerio.");
             }
           },
         },
@@ -87,14 +70,17 @@ export default function MemberDetails() {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#0f172a" />
-        <Text className="mt-3 text-sm text-slate-500">Carregando membro</Text>
+        <Text className="mt-3 text-sm text-slate-500">
+          Carregando ministerio
+        </Text>
       </View>
     );
   }
 
-  if (!member) return null;
+  if (!ministry) return null;
 
-  const isInactive = member.status === "inactive";
+  const isInactive = ministry.status === "inactive";
+  const members = ministry.members || [];
 
   return (
     <ScrollView
@@ -103,7 +89,7 @@ export default function MemberDetails() {
     >
       <View className="mb-5 flex-row items-center justify-between">
         <TouchableOpacity
-          onPress={() => router.replace(MEMBERS_ROUTE)}
+          onPress={() => router.replace(MINISTRIES_ROUTE)}
           className="size-10 items-center justify-center rounded-lg border border-slate-200 bg-white"
           activeOpacity={0.8}
         >
@@ -127,38 +113,66 @@ export default function MemberDetails() {
 
       <View className="mb-5 items-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <View className="mb-4 size-24 items-center justify-center rounded-full border-4 border-amber-400 bg-slate-100">
-          <Ionicons name="person" size={46} color="#b45309" />
+          <Ionicons name="albums" size={44} color="#b45309" />
         </View>
 
         <Text className="text-center text-2xl font-bold text-slate-950">
-          {member.name}
+          {ministry.name}
         </Text>
         <Text className="mt-1 text-center text-sm text-slate-500">
-          Dados cadastrais do membro
+          Dados do ministerio
         </Text>
       </View>
 
       <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <Text className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-          Informacoes de contato
+          Informacoes gerais
         </Text>
 
-        <InfoRow icon="mail" label="Email" value={member.email} />
-        <Divider />
-        <InfoRow icon="call" label="Telefone" value={formatPhone(member.phone)} />
+        <InfoRow icon="person" label="Responsavel" value={getLeaderName(ministry)} />
         <Divider />
         <InfoRow
-          icon="calendar"
-          label="Data de nascimento"
-          value={formatDate(member.birthDate)}
+          icon="mail"
+          label="Email do responsavel"
+          value={ministry.leader?.email}
+        />
+        <Divider />
+        <InfoRow
+          icon="people"
+          label="Participantes"
+          value={`${members.length} membro${members.length === 1 ? "" : "s"}`}
         />
       </View>
+
+      <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <Text className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+          Descricao
+        </Text>
+        <Text className="text-base leading-6 text-slate-700">
+          {ministry.description || "Nao informado"}
+        </Text>
+      </View>
+
+      {members.length > 0 && (
+        <View className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <Text className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+            Membros do ministerio
+          </Text>
+
+          {members.map((member, index) => (
+            <View key={member._id || index}>
+              <InfoRow icon="person" label={member.email || "Membro"} value={member.name} />
+              {index < members.length - 1 && <Divider />}
+            </View>
+          ))}
+        </View>
+      )}
 
       <View className="flex-row gap-3">
         <TouchableOpacity
           className="h-14 flex-1 flex-row items-center justify-center rounded-xl bg-slate-950"
           activeOpacity={0.85}
-          onPress={() => router.push(getEditMemberRoute(id))}
+          onPress={() => router.push(getEditMinistryRoute(id))}
         >
           <MaterialIcons name="edit" size={20} color="#fbbf24" />
           <Text className="ml-2 text-base font-bold text-white">Editar</Text>
