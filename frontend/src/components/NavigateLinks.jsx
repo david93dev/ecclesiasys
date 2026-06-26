@@ -3,6 +3,7 @@ import { createElement } from "react";
 import {
   CalendarDays,
   HandCoins,
+  House,
   LayoutDashboard,
   Settings,
   Users,
@@ -17,6 +18,10 @@ const mainLinks = [
   { to: "/ministries", label: "Ministérios", icon: Workflow },
   { to: "/events", label: "Eventos", icon: CalendarDays },
   { to: "/contributions", label: "Contribuições", icon: HandCoins },
+];
+
+const publicLinks = [
+  { to: "/", label: "Landing page", icon: House },
 ];
 
 const linkClassName = ({ isActive }) =>
@@ -70,6 +75,17 @@ export const NavigateLinks = () => {
           <NavigationLink to="/settings" label="Configurações" icon={Settings} />
         </div>
       )}
+
+      <div className="border-t border-white/10 pt-5">
+        <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Site
+        </p>
+        <div className="space-y-1">
+          {publicLinks.map((link) => (
+            <NavigationLink key={link.to} {...link} />
+          ))}
+        </div>
+      </div>
     </nav>
   );
 };

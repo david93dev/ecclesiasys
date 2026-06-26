@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { api } from "@/services/api";
 
@@ -9,6 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { Label } from "@/components/ui/label";
+
+const initialForm = {
+
+  title: "",
+
+  description: "",
+
+  date: "",
+
+  responsibleId: "",
+
+  participants: [],
+
+  banner: null,
+
+  bannerUrl: "",
+};
 
 export const EventModal = ({
   open,
@@ -22,19 +39,6 @@ export const EventModal = ({
 
   const [errors, setErrors] =
     useState({});
-
-  const initialForm = {
-
-    title: "",
-
-    description: "",
-
-    date: "",
-
-    responsibleId: "",
-
-    participants: [],
-  };
 
   const [form, setForm] =
     useState(initialForm);
@@ -90,6 +94,10 @@ export const EventModal = ({
 
         participants:
           event.participants || [],
+
+        banner: null,
+
+        bannerUrl: event.bannerUrl || "",
       });
 
     } else {
@@ -100,6 +108,25 @@ export const EventModal = ({
     setErrors({});
 
   }, [event, open]);
+
+  const bannerPreview = useMemo(() => {
+
+    if (!form.banner) return form.bannerUrl || "";
+
+    return URL.createObjectURL(form.banner);
+
+  }, [form.banner, form.bannerUrl]);
+
+  useEffect(() => {
+
+    return () => {
+
+      if (form.banner && bannerPreview) {
+        URL.revokeObjectURL(bannerPreview);
+      }
+    };
+
+  }, [form.banner, bannerPreview]);
 
   if (!open) return null;
 
@@ -115,6 +142,13 @@ export const EventModal = ({
       ...prev,
       [field]: null,
     }));
+  };
+
+  const handleBannerChange = (file) => {
+
+    if (!file) return;
+
+    handleChange("banner", file);
   };
 
   // ✅ validação
@@ -431,6 +465,58 @@ export const EventModal = ({
 
               </p>
             )}
+
+          </div>
+
+          {/* BANNER */}
+          <div className="space-y-1.5">
+
+            <Label>Imagem do evento</Label>
+
+            <div
+              className="
+                overflow-hidden rounded-xl
+                border border-slate-200
+                bg-slate-100
+              "
+            >
+              {bannerPreview ? (
+                <img
+                  src={bannerPreview}
+                  alt="Banner do evento"
+                  className="
+                    h-44 w-full
+                    object-cover
+                  "
+                />
+              ) : (
+                <div
+                  className="
+                    flex h-44 items-center
+                    justify-center
+                    text-sm text-slate-500
+                  "
+                >
+                  Nenhuma imagem selecionada
+                </div>
+              )}
+            </div>
+
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                handleBannerChange(e.target.files?.[0])
+              }
+              className="
+                bg-slate-100
+                p-2
+              "
+            />
+
+            <p className="text-xs text-slate-500">
+              Formatos de imagem ate 5MB.
+            </p>
 
           </div>
 

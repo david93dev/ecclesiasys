@@ -1,8 +1,24 @@
-import { FiCalendar, FiUser, FiUsers, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiCalendar, FiUser, FiUsers, FiEdit, FiTrash2, FiImage } from "react-icons/fi";
 
 export const EventCard = ({ event, onEdit, onDelete }) => {
   return (
     <div className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+      {/* BANNER */}
+      <div className="h-36 overflow-hidden bg-slate-100">
+        {event.bannerUrl ? (
+          <img
+            src={event.bannerUrl}
+            alt={`Banner de ${event.title}`}
+            className="size-full object-cover transition duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center text-slate-400">
+            <FiImage size={28} />
+          </div>
+        )}
+      </div>
+
       {/* TOPO */}
       <div className="flex items-start justify-between gap-3 border-b bg-slate-50 p-4 sm:p-5">
         {/* TÍTULO */}

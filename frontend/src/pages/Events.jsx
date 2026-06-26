@@ -23,6 +23,7 @@ export const Events = () => {
         title: e.title,
         description: e.description,
         date: e.date,
+        bannerUrl: e.bannerUrl || "",
         responsible: e.responsible,
         participants: e.participants || [],
       }));
@@ -41,13 +42,16 @@ export const Events = () => {
   // 💾 SALVAR (CREATE + UPDATE)
   const handleSave = async (newEvent) => {
     try {
-      const payload = {
-        title: newEvent.title,
-        description: newEvent.description,
-        date: newEvent.date,
-        responsible: newEvent.responsibleId,
-        participants: newEvent.participants || [],
-      };
+      const payload = new FormData();
+
+      payload.append("title", newEvent.title);
+      payload.append("description", newEvent.description);
+      payload.append("date", newEvent.date);
+      payload.append("responsible", newEvent.responsibleId);
+
+      if (newEvent.banner) {
+        payload.append("banner", newEvent.banner);
+      }
 
       if (selectedEvent) {
         // ✏️ UPDATE

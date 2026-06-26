@@ -1,24 +1,35 @@
-const admin = require("firebase-admin");
-require("dotenv").config(); // Garante que as variáveis do .env sejam lidas
+const path = require("path")
+const admin = require("firebase-admin")
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") })
 
-// Configura as credenciais de acesso do Admin SDK
+const requiredEnvVars = [
+  "PROJECT_ID",
+  "CLIENT_EMAIL",
+  "PRIVATE_KEY",
+  "STORAGE_BUCKET",
+]
+
+const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key])
+
+if (missingEnvVars.length > 0) {
+  throw new Error(
+    `Variaveis de ambiente do Firebase ausentes no backend/.env: ${missingEnvVars.join(", ")}`
+  )
+}
+
 const serviceAccount = {
   projectId: process.env.PROJECT_ID,
   clientEmail: process.env.CLIENT_EMAIL,
-  // Substitui as quebras de linha literais caso dê erro de formatação
-  privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'), 
-};
+  privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+}
 
-// Inicializa o app do Firebase (apenas se já não tiver sido inicializado)
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: process.env.STORAGE_BUCKET // O link do seu "balde" de arquivos
-  });
+    storageBucket: process.env.STORAGE_BUCKET,
+  })
 }
 
-// Pega a instância do Storage
-const bucket = admin.storage().bucket();
+const bucket = admin.storage().bucket()
 
-// Exporta o bucket para ser usado nos controllers/routers
-module.exports = { bucket };
+module.exports = { bucket }

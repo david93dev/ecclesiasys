@@ -199,7 +199,7 @@ export const LandingPage = () => {
       </header>
 
       <main>
-        <section className="border-b border-slate-200 bg-white">
+        <section className="border-b border-slate-200 bg-[#eef2f1]">
           <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
             <div className="max-w-2xl">
               <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-amber-600">
@@ -422,20 +422,31 @@ export const LandingPage = () => {
                 {events.map((event) => (
                   <article
                     key={event._id}
-                    className="flex min-h-64 flex-col rounded-xl border border-white/10 bg-white/[0.06] p-6 transition hover:-translate-y-1 hover:border-amber-300/40 hover:bg-white/[0.09]"
+                    className="flex min-h-64 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] transition hover:-translate-y-1 hover:border-amber-300/40 hover:bg-white/[0.09]"
                   >
-                    <div className="flex items-center gap-2 text-sm font-medium text-amber-300">
-                      <CalendarDays className="size-4" />
-                      <time dateTime={event.date}>{formatEventDate(event.date)}</time>
-                    </div>
-                    <h3 className="mt-5 text-xl font-semibold text-white">
-                      {event.title}
-                    </h3>
-                    <p className="mt-3 line-clamp-3 leading-7 text-slate-300">
-                      {event.description}
-                    </p>
-                    <div className="mt-auto pt-6 text-sm font-medium text-slate-400">
-                      Evento da comunidade
+                    {event.bannerUrl && (
+                      <img
+                        src={event.bannerUrl}
+                        alt={`Banner de ${event.title}`}
+                        className="h-40 w-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+
+                    <div className="flex flex-1 flex-col p-6">
+                      <div className="flex items-center gap-2 text-sm font-medium text-amber-300">
+                        <CalendarDays className="size-4" />
+                        <time dateTime={event.date}>{formatEventDate(event.date)}</time>
+                      </div>
+                      <h3 className="mt-5 text-xl font-semibold text-white">
+                        {event.title}
+                      </h3>
+                      <p className="mt-3 line-clamp-3 leading-7 text-slate-300">
+                        {event.description}
+                      </p>
+                      <div className="mt-auto pt-6 text-sm font-medium text-slate-400">
+                        Evento da comunidade
+                      </div>
                     </div>
                   </article>
                 ))}
