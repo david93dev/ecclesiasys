@@ -25,13 +25,18 @@ const drawerLinks = [
   },
   {
     name: "contributions/index",
-    label: "Contribuicoes",
+    label: "Contribuições",
     icon: "cash",
   },
   {
     name: "ministries/index",
-    label: "Ministerios",
+    label: "Ministérios",
     icon: "albums",
+  },
+  {
+    name: "settings/index",
+    label: "Configurações",
+    icon: "settings",
   },
 ];
 
@@ -301,6 +306,29 @@ export default function Layout() {
         options={{
           drawerItemStyle: { display: "none" },
           title: "Editar Ministerio",
+        }}
+      />
+
+      <Drawer.Screen
+        name="settings/index"
+        options={{
+          title: "Configuracoes",
+        }}
+      />
+
+      <Drawer.Screen
+        name="settings/users/create"
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: "Novo Usuario",
+        }}
+      />
+
+      <Drawer.Screen
+        name="settings/users/edit/[id]"
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: "Editar Usuario",
         }}
       />
     </Drawer>
