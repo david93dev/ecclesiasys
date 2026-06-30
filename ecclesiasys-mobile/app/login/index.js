@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -17,6 +18,8 @@ import logo from "../../assets/img/logo.png";
 
 export default function Login() {
   const { login } = useAuth();
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width >= 768;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,14 +45,25 @@ export default function Login() {
   };
 
   return (
-    <View className="flex-1 items-center justify-center bg-slate-900 p-5">
-      <View className="w-full rounded-2xl bg-white p-6">
+    <View
+      className="flex-1 items-center justify-center bg-slate-900 p-5"
+      style={{ paddingHorizontal: isLargeScreen ? 32 : 20 }}
+    >
+      <View
+        className="w-full rounded-2xl bg-white p-6"
+        style={{
+          maxWidth: isLargeScreen ? 440 : undefined,
+          padding: isLargeScreen ? 32 : 24,
+        }}
+      >
         <View className="mb-6 flex-row items-end justify-center border-b border-slate-200 pb-4">
-          <Image
-            source={logo}
-            className="mr-2.5 h-10 w-10"
-            resizeMode="contain"
-          />
+          <View className="mr-2.5 h-10 w-10 items-center justify-center overflow-hidden">
+            <Image
+              source={logo}
+              style={{ width: 40, height: 40, maxWidth: 40, maxHeight: 40 }}
+              resizeMode="contain"
+            />
+          </View>
 
           <Text className="text-3xl font-bold text-gray-900">
             Ecclesia<Text className="text-amber-400">Sys</Text>

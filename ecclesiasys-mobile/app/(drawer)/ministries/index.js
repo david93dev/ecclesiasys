@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -17,11 +18,13 @@ const CREATE_MINISTRY_ROUTE = "/(drawer)/ministries/create";
 const getMinistryDetailsRoute = (ministryId) => `/(drawer)/ministries/${ministryId}`;
 const getEditMinistryRoute = (ministryId) =>
   `/(drawer)/ministries/edit/${ministryId}`;
+const TABLE_MIN_WIDTH = 752;
 
 const getLeaderName = (ministry) => ministry.leader?.name || "Sem lider";
 const getStatusLabel = (status) => (status === "inactive" ? "inativo" : "ativo");
 
 export default function MinistriesList() {
+  const { width } = useWindowDimensions();
   const [ministries, setMinistries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,6 +92,8 @@ export default function MinistriesList() {
       ]
     );
   };
+
+  const tableWidth = Math.max(width - 32, TABLE_MIN_WIDTH);
 
   if (loading && !refreshing) {
     return (
@@ -207,21 +212,36 @@ export default function MinistriesList() {
           ) : (
             <>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="w-[720px]">
+                <View style={{ width: tableWidth }}>
                   <View className="h-12 flex-row items-center bg-slate-200 px-4">
-                    <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 190 }}
+                    >
                       Ministerio
                     </Text>
-                    <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 190 }}
+                    >
                       Responsavel
                     </Text>
-                    <Text className="w-[120px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 120 }}
+                    >
                       Membros
                     </Text>
-                    <Text className="w-[100px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 100 }}
+                    >
                       Status
                     </Text>
-                    <Text className="w-[110px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 110 }}
+                    >
                       Acoes
                     </Text>
                   </View>
@@ -234,21 +254,26 @@ export default function MinistriesList() {
                       onPress={() => router.push(getMinistryDetailsRoute(ministry._id))}
                     >
                       <Text
-                        className="w-[190px] pr-4 text-sm font-semibold text-slate-800"
+                        className="pr-4 text-sm font-semibold text-slate-800"
+                        style={{ flex: 190 }}
                         numberOfLines={2}
                       >
                         {ministry.name || "-"}
                       </Text>
                       <Text
-                        className="w-[190px] pr-4 text-sm text-slate-600"
+                        className="pr-4 text-sm text-slate-600"
+                        style={{ flex: 190 }}
                         numberOfLines={2}
                       >
                         {getLeaderName(ministry)}
                       </Text>
-                      <Text className="w-[120px] text-sm text-slate-600">
+                      <Text
+                        className="text-sm text-slate-600"
+                        style={{ flex: 120 }}
+                      >
                         {ministry.members?.length || 0}
                       </Text>
-                      <View className="w-[100px]">
+                      <View style={{ flex: 100 }}>
                         <View
                           className={`self-start rounded-full px-3 py-1 ${
                             ministry.status === "inactive"
@@ -267,7 +292,7 @@ export default function MinistriesList() {
                           </Text>
                         </View>
                       </View>
-                      <View className="w-[110px] flex-row gap-3">
+                      <View className="flex-row gap-3" style={{ flex: 110 }}>
                         <TouchableOpacity
                           className="size-9 items-center justify-center rounded-lg bg-slate-100"
                           activeOpacity={0.8}

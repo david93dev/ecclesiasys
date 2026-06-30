@@ -149,7 +149,7 @@ export default function EditUser() {
           form={form}
           saving={saving}
           isEditing
-          submitLabel="Salvar Alteracoes"
+          submitLabel="Salvar Alterações"
           submitIcon="save"
           onChange={updateField}
           onSubmit={handleUpdate}

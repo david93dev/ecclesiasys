@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ const getContributionDetailsRoute = (contributionId) =>
   `/(drawer)/contributions/${contributionId}`;
 const getEditContributionRoute = (contributionId) =>
   `/(drawer)/contributions/edit/${contributionId}`;
+const TABLE_MIN_WIDTH = 752;
 
 const typeLabels = {
   tithe: "Dizimo",
@@ -40,6 +42,7 @@ const formatDate = (date) => {
 const getMemberName = (contribution) => contribution.member?.name || "-";
 
 export default function ContributionsList() {
+  const { width } = useWindowDimensions();
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -110,6 +113,8 @@ export default function ContributionsList() {
       ]
     );
   };
+
+  const tableWidth = Math.max(width - 32, TABLE_MIN_WIDTH);
 
   if (loading && !refreshing) {
     return (
@@ -201,21 +206,36 @@ export default function ContributionsList() {
           ) : (
             <>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="w-[760px]">
+                <View style={{ width: tableWidth }}>
                   <View className="h-12 flex-row items-center bg-slate-200 px-4">
-                    <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 190 }}
+                    >
                       Membro
                     </Text>
-                    <Text className="w-[140px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 140 }}
+                    >
                       Valor
                     </Text>
-                    <Text className="w-[130px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 130 }}
+                    >
                       Tipo
                     </Text>
-                    <Text className="w-[150px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 150 }}
+                    >
                       Data
                     </Text>
-                    <Text className="w-[110px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 110 }}
+                    >
                       Acoes
                     </Text>
                   </View>
@@ -230,25 +250,32 @@ export default function ContributionsList() {
                       }
                     >
                       <Text
-                        className="w-[190px] pr-4 text-sm font-semibold text-slate-800"
+                        className="pr-4 text-sm font-semibold text-slate-800"
+                        style={{ flex: 190 }}
                         numberOfLines={2}
                       >
                         {getMemberName(contribution)}
                       </Text>
-                      <Text className="w-[140px] text-sm font-semibold text-slate-800">
+                      <Text
+                        className="text-sm font-semibold text-slate-800"
+                        style={{ flex: 140 }}
+                      >
                         {formatCurrency(contribution.amount)}
                       </Text>
-                      <View className="w-[130px]">
+                      <View style={{ flex: 130 }}>
                         <View className="self-start rounded-full bg-amber-100 px-3 py-1">
                           <Text className="text-xs font-bold text-amber-700">
                             {typeLabels[contribution.type] || contribution.type}
                           </Text>
                         </View>
                       </View>
-                      <Text className="w-[150px] text-sm text-slate-600">
+                      <Text
+                        className="text-sm text-slate-600"
+                        style={{ flex: 150 }}
+                      >
                         {formatDate(contribution.date)}
                       </Text>
-                      <View className="w-[110px] flex-row gap-3">
+                      <View className="flex-row gap-3" style={{ flex: 110 }}>
                         <TouchableOpacity
                           className="size-9 items-center justify-center rounded-lg bg-slate-100"
                           activeOpacity={0.8}

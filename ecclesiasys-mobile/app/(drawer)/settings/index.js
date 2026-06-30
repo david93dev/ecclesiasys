@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import { userService } from "../../../services/userService";
 
 const CREATE_USER_ROUTE = "/(drawer)/settings/users/create";
 const getEditUserRoute = (userId) => `/(drawer)/settings/users/edit/${userId}`;
+const TABLE_MIN_WIDTH = 722;
 
 const roleLabels = {
   admin: "Administrador",
@@ -24,6 +26,7 @@ const roleLabels = {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { width } = useWindowDimensions();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -98,12 +101,14 @@ export default function SettingsPage() {
     );
   };
 
+  const tableWidth = Math.max(width - 32, TABLE_MIN_WIDTH);
+
   if (loading && !refreshing) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#0f172a" />
         <Text className="mt-3 text-sm text-slate-500">
-          Carregando configuracoes
+          Carregando configurações
         </Text>
       </View>
     );
@@ -123,9 +128,9 @@ export default function SettingsPage() {
         }
       >
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-slate-950">Configuracoes</Text>
+          <Text className="text-2xl font-bold text-slate-950">Configurações</Text>
           <Text className="mt-1 text-sm text-slate-500">
-            Gerencie as configuracoes do sistema
+            Gerencie as configurações do sistema
           </Text>
         </View>
 
@@ -213,18 +218,30 @@ export default function SettingsPage() {
               ) : (
                 <>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View className="w-[720px]">
+                    <View style={{ width: tableWidth }}>
                       <View className="h-12 flex-row items-center bg-slate-200 px-4">
-                        <Text className="w-[190px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                        <Text
+                          className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                          style={{ flex: 190 }}
+                        >
                           Nome
                         </Text>
-                        <Text className="w-[230px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                        <Text
+                          className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                          style={{ flex: 230 }}
+                        >
                           Email
                         </Text>
-                        <Text className="w-[160px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                        <Text
+                          className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                          style={{ flex: 160 }}
+                        >
                           Nivel
                         </Text>
-                        <Text className="w-[110px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                        <Text
+                          className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                          style={{ flex: 110 }}
+                        >
                           Acoes
                         </Text>
                       </View>
@@ -235,18 +252,20 @@ export default function SettingsPage() {
                           className="min-h-16 flex-row items-center border-t border-slate-100 px-4 py-3"
                         >
                           <Text
-                            className="w-[190px] pr-4 text-sm font-semibold text-slate-800"
+                            className="pr-4 text-sm font-semibold text-slate-800"
+                            style={{ flex: 190 }}
                             numberOfLines={2}
                           >
                             {item.name}
                           </Text>
                           <Text
-                            className="w-[230px] pr-4 text-sm text-slate-600"
+                            className="pr-4 text-sm text-slate-600"
+                            style={{ flex: 230 }}
                             numberOfLines={2}
                           >
                             {item.email}
                           </Text>
-                          <View className="w-[160px]">
+                          <View style={{ flex: 160 }}>
                             <View
                               className={`self-start rounded-full px-3 py-1 ${
                                 item.role === "admin"
@@ -265,7 +284,7 @@ export default function SettingsPage() {
                               </Text>
                             </View>
                           </View>
-                          <View className="w-[110px] flex-row gap-3">
+                          <View className="flex-row gap-3" style={{ flex: 110 }}>
                             <TouchableOpacity
                               className="size-9 items-center justify-center rounded-lg bg-slate-100"
                               activeOpacity={0.8}

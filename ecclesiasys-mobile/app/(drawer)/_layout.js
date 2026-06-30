@@ -54,8 +54,12 @@ function CustomDrawerContent(props) {
     <View className="flex-1 bg-slate-950">
       <View className="border-b border-white/10 px-5 py-6">
         <View className="flex-row items-center">
-          <View className="mr-3 size-11 items-center justify-center rounded-xl bg-white/5">
-            <Image source={logo} className="size-8" resizeMode="contain" />
+          <View className="mr-3 size-11 items-center justify-center overflow-hidden rounded-xl bg-white/5">
+            <Image
+              source={logo}
+              style={{ width: 32, height: 32, maxWidth: 32, maxHeight: 32 }}
+              resizeMode="contain"
+            />
           </View>
 
           <View className="flex-1">
@@ -312,7 +316,7 @@ export default function Layout() {
       <Drawer.Screen
         name="settings/index"
         options={{
-          title: "Configuracoes",
+          title: "Configurações",
         }}
       />
 

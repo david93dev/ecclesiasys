@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import { memberService } from "../../../services/memberService";
 const CREATE_MEMBER_ROUTE = "/(drawer)/members/create";
 const getMemberDetailsRoute = (memberId) => `/(drawer)/members/${memberId}`;
 const getEditMemberRoute = (memberId) => `/(drawer)/members/edit/${memberId}`;
+const TABLE_MIN_WIDTH = 792;
 
 const formatPhone = (phone) => {
   const digits = String(phone || "").replace(/\D/g, "");
@@ -34,6 +36,7 @@ const formatPhone = (phone) => {
 const getMemberName = (member) => member.name || member.nome || "-";
 
 export default function MembersList() {
+  const { width } = useWindowDimensions();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -100,6 +103,8 @@ export default function MembersList() {
       ]
     );
   };
+
+  const tableWidth = Math.max(width - 32, TABLE_MIN_WIDTH);
 
   if (loading && !refreshing) {
     return (
@@ -216,21 +221,36 @@ export default function MembersList() {
           ) : (
             <>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="w-[760px]">
+                <View style={{ width: tableWidth }}>
                   <View className="h-12 flex-row items-center bg-slate-200 px-4">
-                    <Text className="w-[180px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 180 }}
+                    >
                       Nome
                     </Text>
-                    <Text className="w-[220px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 220 }}
+                    >
                       Email
                     </Text>
-                    <Text className="w-[150px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 150 }}
+                    >
                       Telefone
                     </Text>
-                    <Text className="w-[100px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 100 }}
+                    >
                       Status
                     </Text>
-                    <Text className="w-[110px] text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Text
+                      className="text-xs font-bold uppercase tracking-wide text-slate-600"
+                      style={{ flex: 110 }}
+                    >
                       Acoes
                     </Text>
                   </View>
@@ -243,21 +263,26 @@ export default function MembersList() {
                       onPress={() => router.push(getMemberDetailsRoute(member._id))}
                     >
                       <Text
-                        className="w-[180px] pr-4 text-sm font-semibold text-slate-800"
+                        className="pr-4 text-sm font-semibold text-slate-800"
+                        style={{ flex: 180 }}
                         numberOfLines={2}
                       >
                         {getMemberName(member)}
                       </Text>
                       <Text
-                        className="w-[220px] pr-4 text-sm text-slate-600"
+                        className="pr-4 text-sm text-slate-600"
+                        style={{ flex: 220 }}
                         numberOfLines={2}
                       >
                         {member.email || "-"}
                       </Text>
-                      <Text className="w-[150px] text-sm text-slate-600">
+                      <Text
+                        className="text-sm text-slate-600"
+                        style={{ flex: 150 }}
+                      >
                         {formatPhone(member.phone)}
                       </Text>
-                      <View className="w-[100px]">
+                      <View style={{ flex: 100 }}>
                         <View
                           className={`self-start rounded-full px-3 py-1 ${
                             member.status === "inactive"
@@ -276,7 +301,7 @@ export default function MembersList() {
                           </Text>
                         </View>
                       </View>
-                      <View className="w-[110px] flex-row gap-3">
+                      <View className="flex-row gap-3" style={{ flex: 110 }}>
                         <TouchableOpacity
                           className="size-9 items-center justify-center rounded-lg bg-slate-100"
                           activeOpacity={0.8}

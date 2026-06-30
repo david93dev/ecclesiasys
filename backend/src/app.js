@@ -37,7 +37,7 @@ app.use("/user", userRoutes)
 app.use("/painel-dashboard", dashboardRoutes)
 
 app.get("/", (req, res) => {
-    res.send("Projeto rodando!")
+    res.send(`Projeto rodando!`)
 })
 
 module.exports = app
